@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f4d36">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Saha Tespit">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Yeni Yol Saha Tespit</title>
+<style>
+/* ---- Leaflet çekirdek stilleri (çevrimdışı çalışsın diye gömülü) ---- */
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0}
+.leaflet-container{overflow:hidden;-webkit-tap-highlight-color:transparent;background:#e6e2d6;outline:0}
+.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow{-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
+.leaflet-container img.leaflet-tile{max-width:none!important;max-height:none!important;mix-blend-mode:normal}
+.leaflet-tile{filter:inherit;visibility:hidden}.leaflet-tile-loaded{visibility:inherit}
+.leaflet-container.leaflet-touch-zoom,.leaflet-container.leaflet-touch-drag{touch-action:none}
+.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}
+.leaflet-map-pane canvas{z-index:100}.leaflet-map-pane svg{z-index:200}
+.leaflet-zoom-animated{transform-origin:0 0}
+.leaflet-zoom-anim .leaflet-zoom-animated{transition:transform .25s cubic-bezier(0,0,.25,1)}
+.leaflet-zoom-anim .leaflet-tile,.leaflet-pan-anim .leaflet-tile{transition:none}
+.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden}
+.leaflet-interactive{cursor:pointer}
+.leaflet-pane>svg path{pointer-events:none}.leaflet-pane>svg path.leaflet-interactive{pointer-events:auto}
+.leaflet-control{position:relative;z-index:800;pointer-events:auto;float:left;clear:both}
+.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}
+.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}
+.leaflet-right .leaflet-control{float:right}
+.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:6px}
+.leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:6px}
+.leaflet-bar{box-shadow:0 1px 5px rgba(0,0,0,.4);border-radius:6px}
+.leaflet-bar a{display:block;width:40px;height:40px;line-height:40px;text-align:center;text-decoration:none;color:#111;background:#fff;font:bold 22px/40px system-ui;border-bottom:1px solid #ccc}
+.leaflet-bar a:first-child{border-radius:6px 6px 0 0}.leaflet-bar a:last-child{border-radius:0 0 6px 6px;border-bottom:0}
+.leaflet-control-attribution{background:rgba(255,255,255,.75);font-size:10px;padding:0 4px;color:#333}
+.leaflet-control-attribution a{color:#333}
+.leaflet-div-icon{background:transparent;border:0}
+
+/* ---- Uygulama ---- */
+:root{--g:#1f4d36;--g2:#2f6b4c;--g3:#e3eee6;--acc:#d9961a;--bg:#f2f0e9;--card:#fff;--ink:#17201b;--mut:#5b665f;--line:#d8d4c7;--err:#b3261e;--errbg:#fbe9e7;--ok:#2e7d32;--warn:#8a5a00;--warnbg:#fff4d6;--r:12px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+#app{display:flex;flex-direction:column;height:100%;height:100dvh}
+header{background:var(--g);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;display:flex;align-items:center;gap:10px}
+header h1{font-size:17px;margin:0;font-weight:650;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .sub{font-size:12px;opacity:.8;font-weight:400;display:block}
+.pill{font-size:12px;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.16);white-space:nowrap}
+.pill.on{background:#c62828;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.6}}
+main{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 20px}
+nav{display:flex;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;padding:9px 4px 8px;font-size:12px;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button svg{width:24px;height:24px}
+nav button.on{color:var(--g);font-weight:650}
+nav button:disabled{opacity:.35}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.card h2{font-size:15px;margin:0 0 8px;color:var(--g)}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:1}
+.mut{color:var(--mut);font-size:13px}
+.btn{border:0;border-radius:10px;padding:12px 14px;font-weight:600;background:var(--g3);color:var(--g);min-height:48px;cursor:pointer}
+.btn.p{background:var(--g);color:#fff}
+.btn.a{background:var(--acc);color:#fff}
+.btn.d{background:var(--errbg);color:var(--err)}
+.btn.big{font-size:17px;min-height:56px;width:100%}
+.btn:active{filter:brightness(.92)}
+.btn:disabled{opacity:.45}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+label.f{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
+input.i,select.i,textarea.i{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;background:#fff;min-height:48px;font-size:17px}
+input.i:focus,textarea.i:focus{outline:0;border-color:var(--g2);box-shadow:0 0 0 3px var(--g3)}
+input.i.err{border-color:var(--err);background:var(--errbg)}
+input.huge{font-size:28px;font-weight:700;text-align:right;min-height:60px;letter-spacing:.5px}
+.seg{display:flex;border:1.5px solid var(--g2);border-radius:10px;overflow:hidden}
+.seg button{flex:1;border:0;background:#fff;color:var(--g);padding:10px 4px;min-height:48px;font-weight:650;font-size:16px}
+.seg button+button{border-left:1.5px solid var(--g2)}
+.seg button.on{background:var(--g2);color:#fff}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 2px;min-height:48px;font-weight:650;font-size:15px}
+.chip.on{background:var(--g);color:#fff;border-color:var(--g)}
+.chip.acc{border-color:var(--acc);color:#7a5200}
+.chip.acc.on{background:var(--acc);color:#fff}
+.zc{text-align:center}
+.zc span{display:block;font-size:11px;color:var(--mut);margin-bottom:3px;white-space:nowrap}
+.zc input{width:100%;text-align:center;border:1.5px solid var(--line);border-radius:8px;padding:9px 2px;font-size:18px;font-weight:650;min-height:46px}
+.tot{display:inline-block;font-weight:700;padding:2px 9px;border-radius:99px;font-size:14px}
+.tot.ok{background:#e3f2e5;color:var(--ok)}.tot.no{background:var(--errbg);color:var(--err)}
+#map{height:46vh;min-height:260px;border-radius:var(--r);border:1px solid var(--line);overflow:hidden;position:relative}
+.mapbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.lst{list-style:none;margin:0;padding:0}
+.lst li{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.lst li:last-child{border-bottom:0}
+.no{width:30px;height:30px;border-radius:50%;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+.lst .km{font-weight:700;font-variant-numeric:tabular-nums;min-width:86px}
+.lst .z{font-size:12px;color:var(--mut);flex:1;min-width:0}
+.tag{font-size:11px;font-weight:700;padding:2px 6px;border-radius:5px;background:var(--warnbg);color:var(--warn)}
+.tag.e{background:var(--errbg);color:var(--err)}
+.mk{width:26px;height:26px;border-radius:50%;background:var(--g);color:#fff;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font:700 12px system-ui}
+.mk.D{background:#1565c0}.mk.KP,.mk.L,.mk.S{background:#8e24aa}.mk.KY{background:var(--acc)}
+.me{width:16px;height:16px;border-radius:50%;background:#1e88e5;border:3px solid #fff;box-shadow:0 0 0 2px rgba(30,136,229,.4)}
+.msg{padding:10px 12px;border-radius:10px;font-size:14px;margin:6px 0}
+.msg.e{background:var(--errbg);color:var(--err)}.msg.w{background:var(--warnbg);color:var(--warn)}.msg.o{background:#e3f2e5;color:var(--ok)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:15px}
+.kv b{font-variant-numeric:tabular-nums}
+.bar{display:flex;height:22px;border-radius:6px;overflow:hidden;margin:6px 0 4px;background:#eee}
+.bar div{height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px}
+.leg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+details.t{border:1px solid var(--line);border-radius:10px;padding:0 12px;margin-top:12px;background:#fafaf7}
+details.t summary{padding:13px 0;font-weight:650;color:var(--g);cursor:pointer}
+.empty{text-align:center;color:var(--mut);padding:30px 10px}
+/* tam ekran sayfa (nokta girişi vb.) */
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:2000;display:flex;flex-direction:column}
+.sheet .sh{background:var(--g);color:#fff;padding:calc(env(safe-area-inset-top) + 8px) 8px 8px;display:flex;align-items:center;gap:6px}
+.sheet .sh h3{flex:1;margin:0;font-size:17px}
+.sheet .sh button{background:none;border:0;color:#fff;font-size:15px;padding:10px;min-width:48px;font-weight:600}
+.sheet .sb{flex:1;overflow:auto;padding:12px 12px 24px}
+.sheet .sf{padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);background:#fff;border-top:1px solid var(--line);display:flex;gap:8px}
+.sheet .sf .btn{flex:1}
+.sec{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.sec>.lbl{font-size:13px;font-weight:700;color:var(--g);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sec>.lbl .mut{text-transform:none;letter-spacing:0;font-weight:400}
+.quick{display:flex;gap:6px;margin-top:8px}
+.quick button{flex:1;min-height:42px;border:1.5px solid var(--line);background:#fff;border-radius:9px;font-weight:650}
+.gps{font-size:13px;color:var(--mut);display:flex;align-items:center;gap:8px}
+.gps b{color:var(--ink)}
+/* diyalog + bildirim */
+.dlg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000;display:flex;align-items:flex-end;justify-content:center}
+.dlg>div{background:#fff;border-radius:16px 16px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 14px);width:100%;max-width:560px}
+.dlg p{margin:0 0 14px;font-size:16px}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 80px);transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:4000;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.on{opacity:.95}
+#printArea{display:none}
+@media (min-width:700px){main{max-width:760px;margin:0 auto;width:100%}.sheet .sb{max-width:640px;margin:0 auto;width:100%}}
+@media print{
+  #app,.sheet,.dlg,#toast{display:none!important}
+  #printArea{display:block}
+  @page{size:A4;margin:10mm}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1 id="hTitle">Saha Tespit<span class="sub">Yeni orman yolu</span></h1>
+    <span class="pill" id="hIz" hidden>● İZ</span>
+    <span class="pill" id="hGps">GPS —</span>
+  </header>
+  <main id="main"></main>
+  <nav id="nav">
+    <button data-go="yollar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="nl">Yollar</span></button>
+    <button data-go="saha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span class="nl">Saha</span></button>
+    <button data-go="imalat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span class="nl">İmalatlar</span></button>
+    <button data-go="ozet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span class="nl">Özet</span></button>
+  </nav>
+</div>
+<div id="toast"></div>
+<div id="printArea"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+   YENİ YOL SAHA TESPİT — Aşama 1 prototipi (v1.0, 10.11.2026)
+   Veri toplama + GPS iz kaydı + Excel / JSON / yazdır + paylaş.
+   JSON çıktısı tespit_aktar.py'nin okuduğu HK<N>_tespit_okunan.json biçimidir.
+   ===================================================================== */
+const SURUM = '1.3';
+const ZN = ['Toprak', 'Küskü', 'Y.Kaya', 'S.Kaya', 'Ç.S.Kaya'];
+const ZRENK = ['#a1887f', '#d4a85a', '#8d9aa5', '#5c6f7c', '#2f3b44'];
+const KODLAR = ['', 'KY', 'KP', 'L', 'D', 'S'];
+const KOD_AD = { '': 'Normal', KY: 'Karşılaşma yeri (21 m)', KP: 'Kurp', L: 'Lase', D: 'Dere geçişi', S: 'Sandık yarma' };
+const KHH = ['KP', 'L', 'S', 'D'];           // k, h, h₂ alanları açılan kodlar
+const PRESET = [['100', [100]], ['90/10', [90, 10]], ['80/20', [80, 20]], ['70/30', [70, 30]],
+  ['60/20/20', [60, 20, 20]], ['60/30/10', [60, 30, 10]], ['50/20/30', [50, 20, 30]], ['40/30/30', [40, 30, 30]]];
+const ARTIFACT = !!(window.claude && typeof window.claude.use === 'function');
+
+/* ---------------------------------------------------------- yardımcılar */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function num(v) {
+  if (v === null || v === undefined) return null;
+  if (typeof v === 'number') return isFinite(v) ? v : null;
+  const s = String(v).trim().replace(/\s/g, '').replace(',', '.');
+  if (s === '' || s === '-' || s === '.') return null;
+  const n = Number(s);
+  return isFinite(n) ? n : null;
+}
+const r2 = n => Math.round(n * 100) / 100;
+function fmt(n, d = 2) { return n === null || n === undefined ? '' : Number(n).toLocaleString('tr-TR', { maximumFractionDigits: d }); }
+function kmF(m) {
+  if (m === null || m === undefined) return '—';
+  const k = Math.floor(m / 1000), r = m - k * 1000;
+  return `${k}+${r.toFixed(2).padStart(6, '0')}`;
+}
+const pad = n => String(n).padStart(2, '0');
+function trTarih(d = new Date()) { return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`; }
+function isoToTr(s) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? `${m[3]}.${m[2]}.${m[1]}` : s; }
+function trToIso(s) { const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s || ''); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; }
+function saat(iso) { if (!iso) return ''; const d = new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function zToplam(z) { return (z || []).reduce((a, b) => a + (num(b) || 0), 0); }
+function zBos(z) { return !z || !z.some(x => num(x)); }
+function zMetin(z) { if (zBos(z)) return ''; return z.map((v, i) => num(v) ? `${ZN[i]} ${fmt(v, 1)}` : null).filter(Boolean).join(' · '); }
+function mesafe(a, b) {   // metre, haversine
+  const R = 6371000, t = Math.PI / 180;
+  const dLa = (b[0] - a[0]) * t, dLo = (b[1] - a[1]) * t;
+  const x = Math.sin(dLa / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function toast(t, ms = 2200) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), ms); }
+function onay(metin, evet = 'Evet', tehlike = false) {
+  return new Promise(res => {
+    const d = document.createElement('div'); d.className = 'dlg';
+    d.innerHTML = `<div><p>${metin}</p><div class="btns"><button class="btn" data-r="0">Vazgeç</button><button class="btn ${tehlike ? 'd' : 'p'}" data-r="1">${esc(evet)}</button></div></div>`;
+    d.addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (b || e.target === d) { d.remove(); res(b ? b.dataset.r === '1' : false); } });
+    document.body.appendChild(d);
+  });
+}
+
+/* ---------------------------------------------------------- depolama (IndexedDB, yedekli) */
+const Depo = {
+  db: null, mod: 'mem', mem: { k: {}, y: [] },
+  p(r) { return new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  st(n, m = 'readonly') { return this.db.transaction(n, m).objectStore(n); },
+  async ac() {
+    try {
+      this.db = await new Promise((res, rej) => {
+        const r = indexedDB.open('yeniYolSahaTespit', 2);
+        r.onupgradeneeded = () => {
+          const d = r.result;
+          if (!d.objectStoreNames.contains('kayit')) d.createObjectStore('kayit', { keyPath: 'id' });
+          if (!d.objectStoreNames.contains('yedek')) d.createObjectStore('yedek', { keyPath: 'n', autoIncrement: true }).createIndex('id', 'id');
+          if (!d.objectStoreNames.contains('foto')) d.createObjectStore('foto', { keyPath: 'id' });
+        };
+        r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+        setTimeout(() => rej(new Error('idb zaman aşımı')), 4000);
+      });
+      this.mod = 'idb';
+    } catch (e) {
+      try { localStorage.setItem('_t', '1'); localStorage.removeItem('_t'); this.mod = 'ls'; } catch (e2) { this.mod = 'mem'; }
+    }
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { }
+  },
+  lsK() { try { return JSON.parse(localStorage.getItem('yys_k') || '{}'); } catch (e) { return {}; } },
+  async hepsi() {
+    if (this.mod === 'idb') return this.p(this.st('kayit').getAll());
+    if (this.mod === 'ls') return Object.values(this.lsK());
+    return Object.values(this.mem.k);
+  },
+  async yaz(k) {
+    k.guncelleme = new Date().toISOString();
+    const v = JSON.parse(JSON.stringify(k));
+    if (this.mod === 'idb') return this.p(this.st('kayit', 'readwrite').put(v));
+    if (this.mod === 'ls') { const o = this.lsK(); o[k.id] = v; localStorage.setItem('yys_k', JSON.stringify(o)); return; }
+    this.mem.k[k.id] = v;
+  },
+  async sil(id) {
+    if (this.mod === 'idb') return this.p(this.st('kayit', 'readwrite').delete(id));
+    if (this.mod === 'ls') { const o = this.lsK(); delete o[id]; localStorage.setItem('yys_k', JSON.stringify(o)); return; }
+    delete this.mem.k[id];
+  },
+  async yedekle(k, neden) {
+    const y = { id: k.id, zaman: new Date().toISOString(), neden, ozet: k.tur === 'soz' ? `${k.kod} sözleşme` : k.tur === 'sy' ? `Sanat yapısı ${(k.yollar || []).map(y => y.kod).join(',')} · ${(k.yapilar || []).length} imalat` : `${k.kod || '?'} HK${k.hk} · ${k.noktalar.length} nokta`, veri: JSON.stringify(k) };
+    try {
+      if (this.mod === 'idb') {
+        await this.p(this.st('yedek', 'readwrite').add(y));
+        const hep = await this.p(this.st('yedek').index('id').getAll(k.id));
+        if (hep.length > 40) { const s = this.st('yedek', 'readwrite'); hep.slice(0, hep.length - 40).forEach(x => s.delete(x.n)); }
+      } else if (this.mod === 'ls') {
+        let a = []; try { a = JSON.parse(localStorage.getItem('yys_y') || '[]'); } catch (e) { }
+        a.push(y); a = a.slice(-60); localStorage.setItem('yys_y', JSON.stringify(a));
+      } else { this.mem.y.push(y); this.mem.y = this.mem.y.slice(-60); }
+    } catch (e) { console.warn('yedek', e); }
+  },
+  async yedekler() {
+    if (this.mod === 'idb') return (await this.p(this.st('yedek').getAll())).reverse();
+    if (this.mod === 'ls') { try { return JSON.parse(localStorage.getItem('yys_y') || '[]').reverse(); } catch (e) { return []; } }
+    return [...this.mem.y].reverse();
+  }
+};
+
+/* ---------------------------------------------------------- durum */
+const S = { kayitlar: [], soz: {}, syIsler: [], syAktifId: null, mod: 'yy', aktif: null, ekran: 'yollar', konum: null, izId: null, wake: null, izKayitT: 0, map: null };
+const aktif = () => S.kayitlar.find(k => k.id === S.aktif) || null;
+async function kaydet(k, yedekNeden) {
+  await Depo.yaz(k);
+  if (yedekNeden) await Depo.yedekle(k, yedekNeden);
+}
+
+/* ---------------------------------------------------------- kurallar / kontroller */
+function kontrol(k) {
+  const H = [], U = [], P = k.noktalar;
+  if (!P.length) H.push({ m: 'Henüz nokta yok.' });
+  P.forEach((p, i) => {
+    const on = P[i - 1];
+    if (on && !(p.km > on.km)) H.push({ i, m: `Nokta ${i + 1}: mesafe artmıyor (${kmF(on.km)} → ${kmF(p.km)})` });
+    if (p.u === null && p.y === null && p.alan === null) H.push({ i, m: `Nokta ${i + 1} (${kmF(p.km)}): u ya da y (ya da özel alan) yok` });
+    const zemIst = i > 0 || p.ilkZemin;
+    if (zemIst) {
+      const dAraligi = on && on.tip === 'D';
+      if (zBos(p.zemin)) { if (!dAraligi) H.push({ i, m: `Nokta ${i + 1} (${kmF(p.km)}): zemin yüzdeleri boş` }); }
+      else if (Math.abs(zToplam(p.zemin) - 100) > 0.01) H.push({ i, m: `Nokta ${i + 1} (${kmF(p.km)}): zemin toplamı %${fmt(zToplam(p.zemin), 1)} (100 olmalı)` });
+    } else if (!zBos(p.zemin)) U.push({ i, m: 'İlk noktada zemin yazılı; hakediş sisteminde yok sayılır' });
+    if (['KP', 'L', 'S'].includes(p.tip) && p.k === null && p.h === null) U.push({ i, m: `Nokta ${i + 1}: ${p.tip} kodu var, k / h girilmemiş` });
+  });
+  const kSiz = P.filter(p => p.lat === null || p.lat === undefined).length;
+  if (kSiz && !k.aktarildi) U.push({ i: P.findIndex(p => p.lat == null), m: kSiz === P.length ? 'Noktalarda koordinat yok' : `${kSiz} noktada koordinat alınamadı` });
+  if (P.length && +k.hk === 1 && P[0].km !== 0) U.push({ i: 0, m: `1. hakediş: yol başlangıcı ${kmF(P[0].km)} (0+000 değil)` });
+  if (P.length > 1 && P[P.length - 1].tip === 'D') U.push({ m: 'Son noktada D kodu var; dere geçişi bir sonraki tespitte kapanacak' });
+  return { H, U };
+}
+function zeminDagilim(k) {
+  const m = [0, 0, 0, 0, 0]; let bos = 0, top = 0;
+  k.noktalar.forEach((p, i) => {
+    if (i === 0 && !p.ilkZemin) return;
+    const on = k.noktalar[i - 1]; const L = on ? p.km - on.km : 0; if (L <= 0) return;
+    top += L;
+    if (zBos(p.zemin)) { bos += L; return; }
+    p.zemin.forEach((v, j) => m[j] += L * (num(v) || 0) / 100);
+  });
+  return { m, bos, top };
+}
+
+/* ---------------------------------------------------------- GPS */
+function gpsGoster() {
+  const e = $('#hGps'), c = S.konum;
+  if (!('geolocation' in navigator)) { e.textContent = 'GPS yok'; return; }
+  if (!c) { e.textContent = 'GPS —'; return; }
+  const yas = (Date.now() - c.t) / 1000;
+  e.textContent = `GPS ±${Math.round(c.acc)} m${yas > 60 ? ' (eski)' : ''}`;
+}
+function konumAl(zorla = false) {
+  return new Promise(res => {
+    if (!('geolocation' in navigator)) return res(null);
+    if (!zorla && S.konum && Date.now() - S.konum.t < 15000) return res(S.konum);
+    let bitti = false;
+    const t = setTimeout(() => { if (!bitti) { bitti = true; res(S.konum); } }, 12000);
+    try {
+      navigator.geolocation.getCurrentPosition(p => {
+        if (bitti) return; bitti = true; clearTimeout(t);
+        S.konum = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy, t: Date.now() };
+        gpsGoster(); res(S.konum);
+      }, () => { if (!bitti) { bitti = true; clearTimeout(t); res(S.konum); } }, { enableHighAccuracy: true, timeout: 11000, maximumAge: 5000 });
+    } catch (e) { bitti = true; clearTimeout(t); res(null); }
+  });
+}
+async function wakeAl() {
+  try { if ('wakeLock' in navigator && !S.wake) { S.wake = await navigator.wakeLock.request('screen'); S.wake.addEventListener('release', () => { S.wake = null; }); } } catch (e) { }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.izId !== null) wakeAl(); });
+function izBaslat() {
+  const k = aktif(); if (!k) return;
+  if (!('geolocation' in navigator)) { toast('Bu cihazda / önizlemede GPS kullanılamıyor'); return; }
+  try {
+    S.izId = navigator.geolocation.watchPosition(p => {
+      S.konum = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy, t: Date.now() };
+      gpsGoster();
+      const kk = aktif(); if (!kk) return;
+      if (p.coords.accuracy <= 40) {
+        const son = kk.iz[kk.iz.length - 1];
+        const yeni = [r6(S.konum.lat), r6(S.konum.lon), new Date().toISOString()];
+        if (!son || mesafe(son, yeni) >= 3) {
+          kk.iz.push(yeni);
+          haritaIz();
+          if (Date.now() - S.izKayitT > 10000) { S.izKayitT = Date.now(); kaydet(kk); }
+          if (S.ekran === 'saha') { const e = $('#izBilgi'); if (e) e.textContent = izMetin(kk); }
+        }
+      }
+      haritaBen();
+    }, err => { toast('GPS hatası: ' + (err.code === 1 ? 'konum izni verilmedi' : err.message)); izDurdur(); },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+  } catch (e) { toast('GPS başlatılamadı'); return; }
+  wakeAl();
+  $('#hIz').hidden = false;
+  render();
+}
+function izDurdur() {
+  if (S.izId !== null) { try { navigator.geolocation.clearWatch(S.izId); } catch (e) { } }
+  S.izId = null;
+  if (S.wake) { try { S.wake.release(); } catch (e) { } S.wake = null; }
+  $('#hIz').hidden = true;
+  const k = aktif(); if (k) kaydet(k, 'iz durduruldu');
+  render();
+}
+const r6 = n => Math.round(n * 1e6) / 1e6;
+function izUzunluk(iz) { let L = 0; for (let i = 1; i < iz.length; i++) L += mesafe(iz[i - 1], iz[i]); return L; }
+function izMetin(k) { return k.iz.length ? `İz: ${k.iz.length} nokta · ${fmt(izUzunluk(k.iz) / 1000, 2)} km` : 'İz kaydı yok'; }
+
+/* ---------------------------------------------------------- harita */
+let HL = {};
+function haritaKur() {
+  const el = $('#map'); if (!el) return;
+  const k = aktif();
+  if (typeof L === 'undefined') { haritaSvg(el, k); return; }
+  try { haritaLeaflet(el, k); } catch (e) { console.warn(e); S.map = null; HL = {}; haritaSvg(el, k); }
+}
+function haritaLeaflet(el, k) {
+  if (S.map) { S.map.remove(); S.map = null; }
+  const map = L.map(el, { zoomControl: true, attributionControl: true, preferCanvas: false });
+  S.map = map;
+  try {
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+  } catch (e) { }
+  HL = { iz: L.polyline([], { color: '#c62828', weight: 4, opacity: .85 }).addTo(map), nok: L.layerGroup().addTo(map), ben: null };
+  haritaIz(); haritaNokta(); haritaBen();
+  const b = haritaSinir(k);
+  if (b) map.fitBounds(b, { padding: [30, 30], maxZoom: 17 });
+  else if (S.konum) map.setView([S.konum.lat, S.konum.lon], 16);
+  else map.setView([40.75, 30.4], 8);
+  setTimeout(() => map.invalidateSize(), 60);
+}
+function haritaSinir(k) {
+  if (!k) return null;
+  const pts = k.iz.map(p => [p[0], p[1]]).concat(k.noktalar.filter(p => p.lat != null).map(p => [p.lat, p.lon]));
+  return pts.length ? (pts.length === 1 ? L.latLngBounds(pts[0], pts[0]).pad(.002) : L.latLngBounds(pts)) : null;
+}
+function haritaIz() {
+  const k = aktif();
+  if (typeof L === 'undefined') { const el = $('#map'); if (el && S.ekran === 'saha') haritaSvg(el, k); return; }
+  if (!S.map || !HL.iz || !k) return;
+  HL.iz.setLatLngs(k.iz.map(p => [p[0], p[1]]));
+}
+function haritaNokta() {
+  const k = aktif(); if (!S.map || !HL.nok || !k) return;
+  HL.nok.clearLayers();
+  k.noktalar.forEach((p, i) => {
+    if (p.lat == null) return;
+    const ic = L.divIcon({ className: '', html: `<div class="mk ${p.tip || ''}">${i + 1}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] });
+    L.marker([p.lat, p.lon], { icon: ic }).addTo(HL.nok).on('click', () => noktaAc(i));
+  });
+}
+function haritaBen() {
+  if (!S.map || typeof L === 'undefined' || !S.konum) return;
+  const ll = [S.konum.lat, S.konum.lon];
+  if (!HL.ben) HL.ben = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="me"></div>', iconSize: [16, 16], iconAnchor: [8, 8] }), interactive: false, zIndexOffset: 1000 }).addTo(S.map);
+  else HL.ben.setLatLng(ll);
+}
+function haritaOrtala() {
+  if (!S.map) return;
+  if (S.konum) S.map.setView([S.konum.lat, S.konum.lon], Math.max(S.map.getZoom(), 16));
+  else { const b = haritaSinir(aktif()); if (b) S.map.fitBounds(b, { padding: [30, 30] }); }
+}
+// Leaflet yüklenemezse: basit şematik çizim (karo yok, kaydırma yok)
+function haritaSvg(el, k) {
+  const pts = k ? k.iz.map(p => [p[0], p[1]]).concat(k.noktalar.filter(p => p.lat != null).map(p => [p.lat, p.lon])) : [];
+  if (!pts.length) { el.innerHTML = '<div class="empty">Harita kütüphanesi yüklenemedi.<br>İz ve noktalar burada şematik çizilecek.</div>'; return; }
+  let a = Infinity, b = -Infinity, c = Infinity, d = -Infinity;
+  pts.forEach(([la, lo]) => { a = Math.min(a, la); b = Math.max(b, la); c = Math.min(c, lo); d = Math.max(d, lo); });
+  const W = 1000, Hh = 600, kx = Math.cos((a + b) / 2 * Math.PI / 180);
+  const sx = (d - c) * kx || 1e-5, sy = (b - a) || 1e-5, s = Math.min((W - 60) / sx, (Hh - 60) / sy);
+  const X = lo => 30 + (lo - c) * kx * s + ((W - 60) - sx * s) / 2, Y = la => Hh - 30 - (la - a) * s - ((Hh - 60) - sy * s) / 2;
+  const iz = k.iz.map(p => `${X(p[1]).toFixed(1)},${Y(p[0]).toFixed(1)}`).join(' ');
+  const nk = k.noktalar.map((p, i) => p.lat == null ? '' : `<g><circle cx="${X(p.lon)}" cy="${Y(p.lat)}" r="13" fill="#1f4d36" stroke="#fff" stroke-width="3"/><text x="${X(p.lon)}" y="${Y(p.lat) + 4.5}" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">${i + 1}</text></g>`).join('');
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${Hh}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style="background:#ece8dc"><polyline points="${iz}" fill="none" stroke="#c62828" stroke-width="5" stroke-linejoin="round"/>${nk}</svg>`;
+}
+
+/* ---------------------------------------------------------- ekranlar */
+function baslik() {
+  const nl = S.mod === 'sy' ? ['İşler', 'İmalatlar', 'Yollar / Fiyat', 'Özet'] : ['Yollar', 'Saha', 'İmalatlar', 'Özet'];
+  document.querySelectorAll('nav .nl').forEach((e, i) => e.textContent = nl[i]);
+  try { localStorage.setItem('yys_mod', S.mod); if (S.syAktifId) localStorage.setItem('yys_syaktif', S.syAktifId); } catch (e) { }
+  if (S.mod === 'sy') {
+    const is = syAktif();
+    $('#hTitle').innerHTML = is ? `Sanat yapısı · ${esc(is.yollar.map(y => y.kod).join(', ') || '—')}<span class="sub">${esc(is.isletme || '')} · ${is.yapilar.length} imalat</span>` : 'Saha Tespit<span class="sub">Sanat yapısı</span>';
+    document.querySelectorAll('nav button').forEach(b => { b.classList.toggle('on', b.dataset.go === S.ekran); b.disabled = b.dataset.go !== 'yollar' && !is; });
+    return;
+  }
+  const k = aktif();
+  try { if (S.aktif) localStorage.setItem('yys_aktif', S.aktif); } catch (e) { }
+  $('#hTitle').innerHTML = k ? `${esc(k.kod || 'Yol')} · HK ${esc(k.hk)}<span class="sub">${esc(k.ad || '')}${k.seflik ? ' · ' + esc(k.seflik) : ''}</span>` : 'Saha Tespit<span class="sub">Yeni orman yolu</span>';
+  document.querySelectorAll('nav button').forEach(b => { b.classList.toggle('on', b.dataset.go === S.ekran); b.disabled = b.dataset.go !== 'yollar' && !k; });
+}
+function render() {
+  baslik();
+  const m = $('#main');
+  if (S.ekran !== 'saha' && S.map) { S.map.remove(); S.map = null; HL = {}; }
+  if (S.mod === 'sy') return ({ yollar: syIsler, saha: sySaha, imalat: syAyar, ozet: syOzet })[S.ekran](m);
+  ({ yollar: ekYollar, saha: ekSaha, imalat: ekImalat, ozet: ekOzet })[S.ekran](m);
+}
+function git(e) { S.ekran = e; render(); $('#main').scrollTop = 0; }
+
+/* ---- 1. Yollar */
+function ekYollar(m) {
+  const L_ = [...S.kayitlar].sort((a, b) => (b.guncelleme || '').localeCompare(a.guncelleme || ''));
+  m.innerHTML = `${modSec()}
+  ${ARTIFACT ? `<div class="msg w">Önizleme modu: claude.ai içinde GPS, paylaş ve yazdır kapalıdır. Veriler bu tarayıcıda tutulur. Saha kullanımı için uygulamayı kendi adresinden (GitHub Pages vb.) açın. <button class="btn" style="margin-top:8px;width:100%" data-act="demo">Örnek veriyle dene</button></div>` : ''}
+  <button class="btn p big" data-act="yeniYol">+ Yeni yol / hakediş tespiti</button>
+  <button class="btn" style="width:100%;margin-top:8px" data-act="iceAl">Devam eden iş: son hakediş Excel'inden al</button>
+  <div style="height:10px"></div>
+  ${L_.length ? L_.map(k => `
+    <div class="card" data-act="ac" data-id="${k.id}" style="cursor:pointer;${k.id === S.aktif ? 'border-color:var(--g2);box-shadow:0 0 0 2px var(--g3)' : ''}">
+      <div class="row" style="align-items:flex-start">
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:17px">${esc(k.kod || '—')} <span class="mut">· HK ${esc(k.hk)}</span></div>
+          <div class="mut">${esc(k.ad || '')}${k.seflik ? ' · ' + esc(k.seflik) : ''}</div>
+          <div class="mut">${esc(k.tarih)} · ${k.noktalar.length} nokta${k.noktalar.length ? ` · ${kmF(k.noktalar[0].km)} → ${kmF(k.noktalar[k.noktalar.length - 1].km)}` : ''}</div>
+        </div>
+        <button class="btn" style="flex:none;min-height:40px;padding:8px 12px" data-act="yolMenu" data-id="${k.id}">⋯</button>
+      </div>
+    </div>`).join('') : '<div class="empty">Kayıt yok. Yeni bir yol / hakediş tespiti oluşturun.</div>'}
+  <div class="card">
+    <h2>Yedek</h2>
+    <div class="mut" style="margin-bottom:8px">Her kayıtta cihazda otomatik yedek alınır (kayıt başına son 40). Depolama: ${({ idb: 'IndexedDB', ls: 'localStorage', mem: 'yalnız bellek — sayfa kapanınca silinir!' })[Depo.mod]}</div>
+    <div class="btns">
+      <button class="btn" data-act="yedekler">Otomatik yedekler</button>
+      <button class="btn" data-act="tumYedek">Tümünü dışa aktar</button>
+      <button class="btn" data-act="iceAl" style="grid-column:span 2">İçe al (yedek, JSON ya da hakediş Excel'i)</button>
+    </div>
+    <input type="file" id="dosyaAl" accept=".json,.xlsx,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+    <div class="mut" style="margin-top:8px">Sürüm ${SURUM}</div>
+  </div>`;
+}
+function yolForm(k, sonraki) {
+  const yeni = !k;
+  const v = k ? { ...k } : { kod: '', seflik: '', ad: '', hk: 1, tarih: trTarih() };
+  if (sonraki) { v.hk = (+k.hk || 0) + 1; v.tarih = trTarih(); }
+  const sh = sayfa(yeni ? 'Yeni tespit' : sonraki ? 'Sonraki hakediş' : 'Yol bilgileri', `
+    ${sonraki ? `<div class="msg o">HK ${esc(k.hk)} kaydının son noktası (${kmF(k.noktalar[k.noktalar.length - 1]?.km)}) başlangıç noktası olarak kopyalanır (zeminsiz).</div>` : ''}
+    <div class="sec">
+      <label class="f">Yol kodu</label><input class="i" id="fKod" value="${esc(v.kod)}" inputmode="text" autocomplete="off">
+      <label class="f">Şeflik</label><input class="i" id="fSef" value="${esc(v.seflik)}" autocomplete="off">
+      <label class="f">Yol adı</label><input class="i" id="fAd" value="${esc(v.ad)}" autocomplete="off">
+      <div class="row">
+        <div><label class="f">Hakediş no</label><input class="i" id="fHk" value="${esc(v.hk)}" inputmode="numeric"></div>
+        <div><label class="f">Tespit tarihi</label><input class="i" id="fTar" type="date" value="${trToIso(v.tarih)}"></div>
+      </div>
+    </div>`, `<button class="btn p big" id="fKaydet">Kaydet</button>`);
+  $('#fKaydet', sh).onclick = async () => {
+    const kod = $('#fKod', sh).value.trim(), hk = parseInt($('#fHk', sh).value, 10);
+    if (!kod) { toast('Yol kodu girin'); return; }
+    if (!(hk >= 1)) { toast('Hakediş no 1 ya da büyük olmalı'); return; }
+    const tarih = isoToTr($('#fTar', sh).value) || trTarih();
+    const ortak = { kod, seflik: $('#fSef', sh).value.trim(), ad: $('#fAd', sh).value.trim(), hk, tarih };
+    if (S.kayitlar.some(x => x.kod === kod && +x.hk === hk && (yeni || sonraki || x.id !== k.id))) {
+      if (!await onay(`${esc(kod)} için HK ${hk} kaydı zaten var. Yine de oluşturulsun mu?`, 'Oluştur')) return;
+    }
+    let kk;
+    if (yeni || sonraki) {
+      kk = { id: uid(), ...ortak, noktalar: [], imalat: [], iz: [], olusturma: new Date().toISOString() };
+      if (sonraki && k.noktalar.length) { const s = k.noktalar[k.noktalar.length - 1]; kk.noktalar.push({ ...s, zemin: null, ilkZemin: false, not: 'Önceki hakedişin son noktası' }); }
+      S.kayitlar.push(kk);
+    } else {
+      const eski = k.kod; kk = k; Object.assign(kk, ortak);
+      if (eski !== kod && S.soz[sozId(eski)] && !S.soz[sozId(kod)] && !S.kayitlar.some(x => x.kod === eski && x !== kk)) {
+        const so = S.soz[sozId(eski)]; delete S.soz[sozId(eski)]; await Depo.sil(sozId(eski)); so.id = sozId(kod); so.kod = kod; S.soz[so.id] = so; await kaydet(so);
+      }
+    }
+    await kaydet(kk, yeni ? 'oluşturuldu' : 'bilgiler');
+    S.aktif = kk.id; sh.kapat(); git(yeni || sonraki ? 'saha' : S.ekran);
+  };
+}
+function yolMenu(k) {
+  const sh = sayfa(`${esc(k.kod)} · HK ${esc(k.hk)}`, `
+    <div class="sec" style="display:grid;gap:8px">
+      <button class="btn" data-m="duz">Yol bilgilerini düzenle</button>
+      <button class="btn" data-m="soz">Sözleşme bilgileri</button>
+      <button class="btn" data-m="son" ${k.noktalar.length ? '' : 'disabled'}>Sonraki hakediş tespitini başlat (HK ${+k.hk + 1})</button>
+      <button class="btn" data-m="kop">Kopyasını oluştur</button>
+      <button class="btn d" data-m="sil">Kaydı sil</button>
+    </div>`, '');
+  sh.addEventListener('click', async e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    if (b.dataset.m === 'duz') { sh.kapat(); yolForm(k); }
+    if (b.dataset.m === 'soz') { sh.kapat(); sozlesmeAc(k); }
+    if (b.dataset.m === 'son') { sh.kapat(); yolForm(k, true); }
+    if (b.dataset.m === 'kop') { const c = JSON.parse(JSON.stringify(k)); c.id = uid(); c.kod = k.kod; c.not = 'kopya'; S.kayitlar.push(c); await kaydet(c, 'kopya'); sh.kapat(); toast('Kopya oluşturuldu'); render(); }
+    if (b.dataset.m === 'sil') {
+      if (!await onay(`<b>${esc(k.kod)} HK ${esc(k.hk)}</b> silinsin mi? (${k.noktalar.length} nokta) — otomatik yedeklerden geri alınabilir.`, 'Sil', true)) return;
+      await Depo.yedekle(k, 'silinmeden önce');
+      await Depo.sil(k.id); S.kayitlar = S.kayitlar.filter(x => x.id !== k.id);
+      if (S.aktif === k.id) { if (S.izId !== null) izDurdur(); S.aktif = null; }
+      sh.kapat(); render();
+    }
+  });
+}
+
+/* ---- 2. Saha */
+function ekSaha(m) {
+  const k = aktif(); if (!k) return git('yollar');
+  const P = k.noktalar, kt = kontrol(k);
+  const hataI = new Set(kt.H.map(h => h.i)), uyI = new Set(kt.U.map(h => h.i));
+  m.innerHTML = `
+    <div id="map"></div>
+    <div class="mut" id="izBilgi" style="margin-top:6px">${izMetin(k)}</div>
+    <div class="mapbtns">
+      ${S.izId === null ? `<button class="btn a" data-act="izBas">▶ İz kaydını başlat</button>` : `<button class="btn d" data-act="izDur">■ İz kaydını durdur</button>`}
+      <button class="btn" data-act="ortala">◎ Konumuma git</button>
+    </div>
+    <button class="btn p big" data-act="noktaEkle">+ Nokta ekle${P.length ? ` <span style="font-weight:400;opacity:.85">(son ${kmF(P[P.length - 1].km)})</span>` : ''}</button>
+    <div class="card" style="margin-top:10px;padding:4px 10px">
+      ${P.length ? `<ul class="lst">${P.map((p, i) => `
+        <li data-act="nokta" data-i="${i}">
+          <span class="no" style="${p.tip === 'D' ? 'background:#1565c0' : ['KP', 'L', 'S'].includes(p.tip) ? 'background:#8e24aa' : p.tip === 'KY' ? 'background:var(--acc)' : ''}">${i + 1}</span>
+          <span class="km">${kmF(p.km)}</span>
+          <span class="z">${p.u !== null ? `u ${fmt(p.u)}` : p.y !== null ? `y %${fmt(p.y, 1)}` : p.alan !== null ? `alan ${fmt(p.alan)}` : '<b style="color:var(--err)">u/y yok</b>'}${p.tip ? ` · <b>${p.tip}</b>` : ''}<br>${(i === 0 && !p.ilkZemin) ? 'başlangıç' : zMetin(p.zemin) || (P[i - 1]?.tip === 'D' ? 'dere aralığı' : '<b style="color:var(--err)">zemin yok</b>')}</span>
+          ${hataI.has(i) ? '<span class="tag e">!</span>' : uyI.has(i) ? '<span class="tag">?</span>' : ''}
+        </li>`).join('')}</ul>` : '<div class="empty">Henüz nokta yok. Yol başlangıcında (0+000) ilk noktayı ekleyin.</div>'}
+    </div>
+    ${kt.H.length ? `<div class="msg e">${kt.H.length} hata — ayrıntı Özet ekranında</div>` : ''}`;
+  haritaKur();
+}
+
+/* ---- Nokta girişi */
+function noktaAc(i) {
+  const k = aktif(); if (!k) return;
+  const yeni = i === undefined || i === null;
+  const P = k.noktalar;
+  const idx = yeni ? P.length : i;
+  const on = P[idx - 1], son = P[idx + 1];
+  const p = yeni ? { km: null, u: null, y: null, egim: null, platform: null, hendek: null, tip: '', k: null, h: null, h2: null, zemin: null, alan: null, not: '', lat: null, lon: null, acc: null, zaman: null, ilkZemin: false }
+    : JSON.parse(JSON.stringify(P[i]));
+  if (!p.zemin) p.zemin = [null, null, null, null, null];
+  let olcu = p.y !== null && p.u === null ? 'y' : 'u';
+  const ilk = idx === 0;
+  const sh = sayfa(yeni ? `Nokta ${idx + 1}` : `Nokta ${idx + 1} düzenle`, `
+    <div class="sec">
+      <div class="lbl">Kümülatif mesafe (m) <span class="mut">${on ? `önceki ${kmF(on.km)}` : 'yol başlangıcı'}</span></div>
+      <input class="i huge" id="nKm" inputmode="decimal" autocomplete="off" placeholder="${on ? fmt(on.km + 20) : '0'}" value="${p.km === null ? '' : String(p.km).replace('.', ',')}">
+      ${on ? `<div class="quick">${[10, 20, 25, 50].map(d => `<button data-dk="${d}">+${d}</button>`).join('')}</div>` : ''}
+      <div class="mut" id="nKmBil" style="margin-top:6px"></div>
+    </div>
+    <div class="sec">
+      <div class="lbl">Ölçü</div>
+      <div class="seg" id="nOlcu"><button data-o="u">u — şev uzunluğu (m)</button><button data-o="y">y — yamaç eğimi (%)</button></div>
+      <input class="i huge" id="nOl" inputmode="decimal" autocomplete="off" style="margin-top:8px">
+    </div>
+    <div class="sec">
+      <div class="lbl">Kesit kodu <span class="mut" id="nKodAd"></span></div>
+      <div class="grid5" style="grid-template-columns:repeat(6,1fr)" id="nKod">${KODLAR.map(c => `<button class="chip" data-k="${c}">${c || '—'}</button>`).join('')}</div>
+      <div id="nKhh" class="row" style="margin-top:4px">
+        <div><label class="f">k (m)</label><input class="i" id="nK" inputmode="decimal" value="${p.k ?? ''}"></div>
+        <div><label class="f">h (m)</label><input class="i" id="nH" inputmode="decimal" value="${p.h ?? ''}"></div>
+        <div><label class="f">h₂ (m)</label><input class="i" id="nH2" inputmode="decimal" value="${p.h2 ?? ''}"></div>
+      </div>
+      <div class="mut" id="nKodNot" style="margin-top:6px"></div>
+    </div>
+    <div class="sec" id="nZemSec">
+      <div class="lbl">Zemin <span class="mut" id="nAra"></span></div>
+      <div class="grid4" id="nPre">${PRESET.map(([t]) => `<button class="chip" data-p="${t}">${t}</button>`).join('')}
+        <button class="chip acc" data-p="ayni" style="grid-column:span 2" ${on && !zBos(on.zemin) ? '' : 'disabled'}>Aynı</button>
+        <button class="chip" data-p="ozel" style="grid-column:span 2">Özel / temizle</button></div>
+      <div class="grid5" style="margin-top:10px">${ZN.map((z, j) => `<label class="zc"><span>${z}</span><input id="nZ${j}" inputmode="decimal" autocomplete="off"></label>`).join('')}</div>
+      <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><span class="mut">Hazır oranlar Toprak → Küskü → Y.Kaya sırasıyla dolar.</span><span class="tot" id="nTot"></span></div>
+    </div>
+    ${ilk && +k.hk > 1 ? `<label class="sec" style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="nIlkZ" ${p.ilkZemin ? 'checked' : ''} style="width:22px;height:22px"> <span>Bu nokta önceki hakedişin son noktası değil — öncesine ait zemini gir</span></label>` : ''}
+    <details class="t" id="nTek" ${p.egim !== null || p.platform !== null || p.hendek || p.alan !== null || p.not ? 'open' : ''}>
+      <summary>Teknik bilgiler (isteğe bağlı)</summary>
+      <div class="row"><div><label class="f">Boyuna eğim (%)</label><input class="i" id="nEg" inputmode="decimal" value="${p.egim ?? ''}"></div>
+      <div><label class="f">Platform (m)</label><input class="i" id="nPl" inputmode="decimal" value="${p.platform ?? ''}"></div></div>
+      <label class="f">Hendek</label>
+      <div class="seg" id="nHen"><button data-h="">—</button><button data-h="V">Var</button><button data-h="Y">Yok</button></div>
+      <label class="f">Özel alan (m²)</label><input class="i" id="nAl" inputmode="decimal" value="${p.alan ?? ''}">
+      <label class="f">Not</label><textarea class="i" id="nNot" rows="2">${esc(p.not || '')}</textarea>
+      <div style="height:12px"></div>
+    </details>
+    <div class="sec gps" style="margin-top:12px"><span style="flex:1" id="nGps">Konum alınıyor…</span><button class="btn" style="min-height:40px;padding:6px 12px" id="nGpsY">Yenile</button></div>
+    <div id="nMsg"></div>
+    ${yeni ? '' : '<button class="btn d" id="nSil" style="width:100%;margin-top:6px">Noktayı sil</button>'}`,
+    `<button class="btn" id="nKay">Kaydet</button><button class="btn p" id="nKayY" style="flex:1.4">Kaydet + yeni nokta</button>`);
+
+  const $$ = s => $(s, sh);
+  const kmI = $$('#nKm'), olI = $$('#nOl');
+  // ölçü
+  function olcuGoster() {
+    sh.querySelectorAll('#nOlcu button').forEach(b => b.classList.toggle('on', b.dataset.o === olcu));
+    olI.placeholder = olcu === 'u' ? 'u (m)' : 'y (%)';
+    const v = olcu === 'u' ? p.u : p.y; olI.value = v === null ? '' : String(v).replace('.', ',');
+  }
+  $$('#nOlcu').onclick = e => { const b = e.target.closest('[data-o]'); if (!b) return; const v = num(olI.value); p.u = p.y = null; olcu = b.dataset.o; if (olcu === 'u') p.u = v; else p.y = v; olcuGoster(); };
+  olI.oninput = () => { const v = num(olI.value); if (olcu === 'u') { p.u = v; p.y = null; } else { p.y = v; p.u = null; } };
+  // kod
+  function kodGoster() {
+    sh.querySelectorAll('#nKod .chip').forEach(b => b.classList.toggle('on', b.dataset.k === (p.tip || '')));
+    $$('#nKodAd').textContent = KOD_AD[p.tip || ''];
+    $$('#nKhh').style.display = KHH.includes(p.tip) ? '' : 'none';
+    $$('#nKodNot').textContent = p.tip === 'KY' ? 'Karşılaşma yeri bu noktadan itibaren 21 m.' : p.tip === 'D' ? 'Dere geçişi: k / h boş bırakılırsa kazı 0. Sonraki aralıkta zemin boş bırakılabilir.' : p.tip ? 'Kod bu noktadan bir sonraki noktaya kadar geçerli.' : '';
+  }
+  $$('#nKod').onclick = e => { const b = e.target.closest('[data-k]'); if (!b) return; p.tip = b.dataset.k; kodGoster(); };
+  // zemin
+  const zI = ZN.map((_, j) => $$('#nZ' + j));
+  const zemGerekli = () => !ilk || ($$('#nIlkZ') && $$('#nIlkZ').checked);
+  function zemGoster(yaz = true) {
+    if (yaz) zI.forEach((e, j) => e.value = num(p.zemin[j]) ? String(p.zemin[j]).replace('.', ',') : '');
+    const t = zToplam(p.zemin), bos = zBos(p.zemin), dAr = on && on.tip === 'D';
+    const tt = $$('#nTot');
+    tt.className = 'tot ' + (Math.abs(t - 100) < .01 || (bos && dAr) ? 'ok' : 'no');
+    tt.textContent = bos ? (dAr ? 'boş (dere)' : 'Toplam 0') : `Toplam ${fmt(t, 1)}`;
+    $$('#nZemSec').style.display = zemGerekli() ? '' : 'none';
+    sh.querySelectorAll('#nPre [data-p]').forEach(b => {
+      const pr = PRESET.find(x => x[0] === b.dataset.p);
+      const es = pr ? ZN.every((_, j) => (num(p.zemin[j]) || 0) === (pr[1][j] || 0)) : b.dataset.p === 'ayni' && on && !bos && ZN.every((_, j) => (num(p.zemin[j]) || 0) === (num(on.zemin?.[j]) || 0));
+      b.classList.toggle('on', !!es);
+    });
+  }
+  $$('#nPre').onclick = e => {
+    const b = e.target.closest('[data-p]'); if (!b || b.disabled) return;
+    const v = b.dataset.p;
+    if (v === 'ayni') p.zemin = [...on.zemin];
+    else if (v === 'ozel') { p.zemin = [null, null, null, null, null]; zemGoster(); zI[0].focus(); return; }
+    else { const pr = PRESET.find(x => x[0] === v)[1]; p.zemin = ZN.map((_, j) => pr[j] || null); }
+    zemGoster();
+  };
+  zI.forEach((e, j) => e.oninput = () => { p.zemin[j] = num(e.value); zemGoster(false); });
+  if ($$('#nIlkZ')) $$('#nIlkZ').onchange = () => zemGoster(false);
+  // mesafe
+  function kmBilgi() {
+    const v = num(kmI.value), e = $$('#nKmBil');
+    kmI.classList.remove('err');
+    if (v === null) { e.textContent = ''; $$('#nAra').textContent = on ? `${kmF(on.km)} → ?` : ''; return; }
+    let t = kmF(v);
+    if (on) { const d = v - on.km; t += ` · aralık ${fmt(d)} m`; if (d <= 0) { kmI.classList.add('err'); t += ' — önceki noktadan büyük olmalı'; } }
+    if (son && v >= son.km) { kmI.classList.add('err'); t += ` — sonraki nokta ${kmF(son.km)}'den küçük olmalı`; }
+    e.textContent = t;
+    $$('#nAra').textContent = on ? `${kmF(on.km)} → ${kmF(v)} (${fmt(v - on.km)} m)` : '';
+  }
+  kmI.oninput = kmBilgi;
+  sh.querySelectorAll('[data-dk]').forEach(b => b.onclick = () => { kmI.value = String(r2(on.km + +b.dataset.dk)).replace('.', ','); kmBilgi(); });
+  // hendek
+  function henGoster() { sh.querySelectorAll('#nHen button').forEach(b => b.classList.toggle('on', b.dataset.h === (p.hendek || ''))); }
+  $$('#nHen').onclick = e => { const b = e.target.closest('[data-h]'); if (!b) return; p.hendek = b.dataset.h || null; henGoster(); };
+  // gps
+  function gpsYaz() {
+    const g = $$('#nGps');
+    if (p.lat != null) g.innerHTML = `📍 <b>${p.lat.toFixed(6)}, ${p.lon.toFixed(6)}</b> ±${Math.round(p.acc || 0)} m · ${saat(p.zaman)}`;
+    else g.textContent = ('geolocation' in navigator) ? 'Konum alınamadı (nokta yine kaydedilir)' : 'Bu cihazda konum yok';
+  }
+  async function gpsTaze(zorla) {
+    $$('#nGps').textContent = 'Konum alınıyor…';
+    const c = await konumAl(zorla);
+    if (c) { p.lat = r6(c.lat); p.lon = r6(c.lon); p.acc = Math.round(c.acc); p.zaman = new Date().toISOString(); }
+    if (sh.isConnected) gpsYaz();
+  }
+  $$('#nGpsY').onclick = () => gpsTaze(true);
+  olcuGoster(); kodGoster(); zemGoster(); henGoster(); kmBilgi();
+  if (yeni) { gpsTaze(false); setTimeout(() => kmI.focus(), 80); } else gpsYaz();
+  if (!yeni && !p.zaman) p.zaman = new Date().toISOString();
+
+  async function kaydetN(devam) {
+    const msg = $$('#nMsg'); msg.innerHTML = '';
+    const err = t => { msg.innerHTML = `<div class="msg e">${t}</div>`; msg.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+    p.km = num(kmI.value);
+    if (p.km === null) return err('Kümülatif mesafeyi girin.');
+    if (p.km < 0) return err('Mesafe negatif olamaz.');
+    if (on && !(p.km > on.km)) return err(`Mesafe önceki noktadan (${kmF(on.km)}) büyük olmalı.`);
+    if (son && !(p.km < son.km)) return err(`Mesafe sonraki noktadan (${kmF(son.km)}) küçük olmalı.`);
+    p.k = num($$('#nK').value); p.h = num($$('#nH').value); p.h2 = num($$('#nH2').value);
+    if (!KHH.includes(p.tip)) p.k = p.h = p.h2 = null;
+    p.egim = num($$('#nEg').value); p.platform = num($$('#nPl').value); p.alan = num($$('#nAl').value); p.not = $$('#nNot').value.trim();
+    if (p.u === null && p.y === null && p.alan === null) return err('u ya da y değerini girin (ya da teknik bölümde özel alan).');
+    p.ilkZemin = ilk ? !!($$('#nIlkZ') && $$('#nIlkZ').checked) : false;
+    if (zemGerekli()) {
+      const dAr = on && on.tip === 'D';
+      if (zBos(p.zemin)) { if (!dAr) return err('Zemin yüzdelerini girin (hazır tuş, “Aynı” ya da özel).'); }
+      else if (Math.abs(zToplam(p.zemin) - 100) > 0.01) return err(`Zemin toplamı %${fmt(zToplam(p.zemin), 1)} — 100 olmadan kaydedilmez.`);
+    } else p.zemin = null;
+    if (zBos(p.zemin)) p.zemin = null;
+    if (yeni) P.push(p); else P[i] = p;
+    await kaydet(k, yeni ? `nokta ${idx + 1} eklendi` : `nokta ${idx + 1} düzenlendi`);
+    sh.kapat(); render();
+    toast(`Nokta ${idx + 1} kaydedildi · ${kmF(p.km)}`);
+    if (devam) noktaAc();
+  }
+  $$('#nKay').onclick = () => kaydetN(false);
+  $$('#nKayY').onclick = () => kaydetN(true);
+  if (!yeni) $$('#nSil').onclick = async () => {
+    if (!await onay(`Nokta ${idx + 1} (${kmF(P[i].km)}) silinsin mi?${P[i + 1] ? '<br><span class="mut">Sonraki noktanın zemini artık daha uzun bir aralığa ait olacak; kontrol edin.</span>' : ''}`, 'Sil', true)) return;
+    P.splice(i, 1); await kaydet(k, `nokta ${idx + 1} silindi`); sh.kapat(); render();
+  };
+}
+
+/* ---- 4. Diğer imalatlar */
+function ekImalat(m) {
+  const k = aktif(); if (!k) return git('yollar');
+  const bilinen = [...new Set(S.kayitlar.flatMap(x => x.imalat.map(i => i.poz)))];
+  const so = sozAl(k.kod), elle = sozKalemler(so).filter(x => x.kaynak === 'ELLE');
+  m.innerHTML = `
+    <div class="card">
+      <h2>Diğer imalatlar</h2>
+      <div class="mut">Kazı dışındaki imalatlar (kök sökme vb.). Miktar <b>bu tespitteki</b> miktardır; hakediş sistemi önceki hakedişle toplar.</div>
+      ${elle.length ? `<label class="f">Sözleşmedeki kalemler (dokunun)</label><div style="display:grid;gap:6px">${elle.map(x => `<button class="chip" style="text-align:left;padding:8px 10px;font-weight:500" data-act="imSec" data-poz="${esc(x.poz)}" data-ad="${esc(x.ad)}"><b>${esc(x.poz)}</b> · ${esc(x.ad)} <span class="mut">(${esc(x.birim)})</span></button>`).join('')}</div>` : so ? '' : '<div class="msg w" style="margin-top:8px">Sözleşme girilince elle kalemler burada seçilebilir.</div>'}
+      <label class="f">Poz no</label><input class="i" id="iPoz" list="pozlar" autocomplete="off" placeholder="ör. OGM/…">
+      <datalist id="pozlar">${bilinen.map(p => `<option value="${esc(p)}">`).join('')}</datalist>
+      <div class="row"><div><label class="f">Açıklama (isteğe bağlı)</label><input class="i" id="iAc" autocomplete="off"></div>
+      <div style="flex:.6"><label class="f">Miktar</label><input class="i" id="iMik" inputmode="decimal" autocomplete="off"></div></div>
+      <button class="btn p big" style="margin-top:10px" data-act="imEkle">Ekle</button>
+    </div>
+    <div class="card" style="padding:4px 10px">
+      ${k.imalat.length ? `<ul class="lst">${k.imalat.map((x, j) => `<li><span style="flex:1"><b>${esc(x.poz)}</b>${so && !sozKalemler(so).some(y => pozEs(y.poz, x.poz)) ? ' <span class="tag e">sözleşmede yok</span>' : ''}${x.aciklama ? `<br><span class="mut">${esc(x.aciklama)}</span>` : ''}</span><b>${fmt(x.miktar, 3)}</b><button class="btn d" style="min-height:38px;padding:6px 10px;flex:none" data-act="imSil" data-j="${j}">Sil</button></li>`).join('')}</ul>` : '<div class="empty">İmalat yok.</div>'}
+    </div>`;
+}
+
+/* ---- 5. Özet / dışa aktar */
+function ekOzet(m) {
+  const k = aktif(); if (!k) return git('yollar');
+  const P = k.noktalar, kt = kontrol(k), zd = zeminDagilim(k);
+  const uz = P.length > 1 ? P[P.length - 1].km - P[0].km : 0;
+  const kodlar = KODLAR.filter(Boolean).map(c => [c, P.filter(p => p.tip === c).length]).filter(x => x[1]);
+  m.innerHTML = `
+    <div class="card"><h2>${esc(k.kod)} · HK ${esc(k.hk)} · ${esc(k.tarih)}</h2>
+      <div class="kv">
+        <span>Nokta</span><b>${P.length}</b>
+        <span>Aralık</span><b>${P.length ? `${kmF(P[0].km)} → ${kmF(P[P.length - 1].km)}` : '—'}</b>
+        <span>Ölçülen uzunluk</span><b>${fmt(uz)} m</b>
+        <span>GPS izi</span><b>${k.iz.length ? `${fmt(izUzunluk(k.iz))} m (${k.iz.length} nokta)` : '—'}</b>
+        <span>Kesit kodları</span><b>${kodlar.length ? kodlar.map(x => `${x[0]} ×${x[1]}`).join(', ') : '—'}</b>
+        <span>Diğer imalat</span><b>${k.imalat.length} kalem</b>
+      </div>
+    </div>
+    <div class="card"><h2>Zemin dağılımı (uzunluk ağırlıklı)</h2>
+      ${zd.top > 0 ? `<div class="bar">${zd.m.map((v, j) => v > 0 ? `<div style="width:${v / zd.top * 100}%;background:${ZRENK[j]}" title="${ZN[j]}"></div>` : '').join('')}${zd.bos > 0 ? `<div style="width:${zd.bos / zd.top * 100}%;background:repeating-linear-gradient(45deg,#90caf9 0 6px,#e3f2fd 6px 12px)"></div>` : ''}</div>
+      <div class="leg">${zd.m.map((v, j) => v > 0 ? `<span><i style="background:${ZRENK[j]}"></i>${ZN[j]} <b>${fmt(v / zd.top * 100, 1)}%</b> (${fmt(v, 0)} m)</span>` : '').join('')}${zd.bos > 0 ? `<span><i style="background:#90caf9"></i>Dere (boş) ${fmt(zd.bos, 0)} m</span>` : ''}</div>` : '<div class="mut">Zemin girilmiş aralık yok.</div>'}
+    </div>
+    <div class="card"><h2>Kontroller</h2>
+      ${!kt.H.length && !kt.U.length ? '<div class="msg o">Tüm kontroller tamam.</div>' : ''}
+      ${kt.H.map(h => `<div class="msg e" ${h.i !== undefined ? `data-act="nokta" data-i="${h.i}" style="cursor:pointer"` : ''}>✕ ${h.m}</div>`).join('')}
+      ${kt.U.map(h => `<div class="msg w" ${h.i !== undefined ? `data-act="nokta" data-i="${h.i}" style="cursor:pointer"` : ''}>! ${h.m}</div>`).join('')}
+    </div>
+    ${hkKart(k)}
+    <div class="card"><h2>Saha tespiti dışa aktar</h2>
+      ${kt.H.length ? '<div class="msg w">Hatalar giderilmeden de dışa aktarılabilir; hakediş sistemi aynı hataları durdurur.</div>' : ''}
+      <div class="btns">
+        <button class="btn p" data-act="xlsx">Excel indir</button>
+        <button class="btn p" data-act="xlsxPay" ${ARTIFACT ? 'disabled' : ''}>Excel paylaş<br><span style="font-weight:400;font-size:12px">WhatsApp vb.</span></button>
+        <button class="btn" data-act="json">JSON (sistem için)</button>
+        <button class="btn" data-act="jsonPay" ${ARTIFACT ? 'disabled' : ''}>JSON paylaş</button>
+        <button class="btn" data-act="kml">GPS izi (KML)</button>
+        <button class="btn" data-act="kmlPay" ${ARTIFACT ? 'disabled' : ''}>KML paylaş</button>
+        <button class="btn" data-act="yazdir" style="grid-column:span 2">${ARTIFACT ? 'Yazdırılabilir formu indir (HTML)' : 'Yazdır / PDF (A4 saha tespit formu)'}</button>
+      </div>
+      <div class="mut" style="margin-top:10px">JSON dosyası: <b>${esc(dosyaAdi(k, 'json'))}</b> — yol klasörüne koyup “${esc(k.kod)} kodlu yolun ${esc(k.hk)} nolu hakedişini hazırla” deyin.</div>
+    </div>`;
+}
+
+/* ---------------------------------------------------------- çıktılar */
+function dosyaAdi(k, tur) {
+  const kod = String(k.kod || 'YOL').replace(/[\\/:*?"<>|\s]+/g, '_');
+  if (tur === 'json') return `HK${k.hk}_tespit_okunan.json`;
+  if (tur === 'xlsx') return `${kod}_HK${k.hk}_SAHA_TESPIT.xlsx`;
+  if (tur === 'kml') return `${kod}_HK${k.hk}_GPS_IZ.kml`;
+  if (tur === 'html') return `${kod}_HK${k.hk}_SAHA_TESPIT_FORMU.html`;
+  return `${kod}_HK${k.hk}.${tur}`;
+}
+function jsonUret(k) {
+  const imalat = {};
+  k.imalat.forEach(x => { imalat[x.poz] = r2((imalat[x.poz] || 0) + x.miktar); });
+  return {
+    tarih: k.tarih, hk: +k.hk,
+    yol: { kod: k.kod, seflik: k.seflik, ad: k.ad },
+    kaynak: `Saha Tespit uygulaması v${SURUM}`,
+    noktalar: k.noktalar.map((p, i) => ({
+      km: p.km, u: p.u, y: p.y, egim: p.egim, platform: p.platform, hendek: p.hendek || null, tip: p.tip || '',
+      k: p.k, h: p.h, h2: p.h2,
+      zemin: (i === 0 && !p.ilkZemin) || zBos(p.zemin) ? [null, null, null, null, null] : p.zemin.map(v => num(v) || null),
+      alan: p.alan, not: p.not || null, lat: p.lat ?? null, lon: p.lon ?? null, zaman: p.zaman || null
+    })),
+    imalat,
+    iz: k.iz
+  };
+}
+function xlsxUret(k) {
+  if (typeof XLSX === 'undefined') return null;
+  const P = k.noktalar, A = [];
+  A.push(['YENİ ORMAN YOLU — SAHA TESPİTİ']);
+  A.push(['Yol kodu', k.kod, '', 'Şeflik', k.seflik]);
+  A.push(['Yol adı', k.ad, '', 'Hakediş no', +k.hk]);
+  A.push(['Tespit tarihi', k.tarih, '', 'Nokta sayısı', P.length]);
+  A.push([]);
+  const bas = ['Sıra', 'Mesafe (m)', 'Km', 'Aralık (m)', 'u (m)', 'y (%)', 'Boyuna eğim (%)', 'Platform (m)', 'Hendek', 'Kod', 'k (m)', 'h (m)', 'h₂ (m)',
+    'Toprak %', 'Küskü %', 'Y.Kaya %', 'S.Kaya %', 'Ç.S.Kaya %', 'Özel alan (m²)', 'Not', 'Enlem', 'Boylam', 'Saat'];
+  A.push(bas);
+  const r0 = A.length;
+  P.forEach((p, i) => {
+    const z = (i === 0 && !p.ilkZemin) || zBos(p.zemin) ? [null, null, null, null, null] : p.zemin.map(v => num(v) || null);
+    A.push([i + 1, p.km, kmF(p.km), i ? r2(p.km - P[i - 1].km) : null, p.u, p.y, p.egim, p.platform, p.hendek === 'V' ? 'VAR' : p.hendek === 'Y' ? 'YOK' : '',
+      p.tip || '', p.k, p.h, p.h2, ...z, p.alan, p.not || '', p.lat ?? null, p.lon ?? null, p.zaman ? saat(p.zaman) : '']);
+  });
+  A.push([]);
+  A.push(['Zemin: her satırın yüzdeleri bir önceki noktadan o noktaya kadar olan aralığa aittir; ilk satırda zemin yoktur. Kod, yazıldığı noktadan sonraki noktaya kadar geçerlidir (KY = 21 m).']);
+  A.push([]);
+  A.push(['DİĞER İMALATLAR (bu tespit)']);
+  A.push(['Poz', 'Açıklama', 'Miktar']);
+  if (k.imalat.length) k.imalat.forEach(x => A.push([x.poz, x.aciklama || '', x.miktar])); else A.push(['—']);
+  A.push([]);
+  const zd = zeminDagilim(k);
+  A.push(['ZEMİN DAĞILIMI (uzunluk ağırlıklı)']);
+  A.push(['Sınıf', 'Uzunluk (m)', 'Oran %']);
+  ZN.forEach((z, j) => A.push([z, r2(zd.m[j]), zd.top ? r2(zd.m[j] / zd.top * 100) : 0]));
+  if (zd.bos) A.push(['Dere (zeminsiz)', r2(zd.bos), r2(zd.bos / zd.top * 100)]);
+  A.push(['Toplam', r2(zd.top), zd.top ? 100 : 0]);
+  const ws = XLSX.utils.aoa_to_sheet(A);
+  ws['!cols'] = [6, 11, 11, 10, 8, 8, 10, 10, 8, 6, 7, 7, 7, 9, 9, 9, 9, 10, 11, 24, 11, 11, 7].map(w => ({ wch: w }));
+  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }, { s: { r: r0 + P.length + 1, c: 0 }, e: { r: r0 + P.length + 1, c: 22 } }];
+  ws['!freeze'] = { xSplit: 0, ySplit: r0 };
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'SAHA TESPİT');
+  const iz = [['Sıra', 'Enlem', 'Boylam', 'Zaman']].concat(k.iz.map((p, i) => [i + 1, p[0], p[1], p[2]]));
+  const wi = XLSX.utils.aoa_to_sheet(iz); wi['!cols'] = [{ wch: 6 }, { wch: 12 }, { wch: 12 }, { wch: 24 }];
+  XLSX.utils.book_append_sheet(wb, wi, 'GPS İZİ');
+  wb.Props = { Title: `${k.kod} HK${k.hk} saha tespiti`, Author: 'Saha Tespit' };
+  const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  return new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+function kmlUret(k) {
+  const x = v => esc(v ?? '');
+  const ad = `${k.kod} HK${k.hk} ${k.ad || ''}`.trim();
+  const iz = k.iz.map(p => `${p[1]},${p[0]},0`).join(' ');
+  const nk = k.noktalar.map((p, i) => p.lat == null ? '' : `
+    <Placemark><name>${i + 1} · ${kmF(p.km)}</name><styleUrl>#n${p.tip || 'N'}</styleUrl>
+      <description><![CDATA[Mesafe: ${fmt(p.km)} m<br>${p.u !== null ? 'u: ' + fmt(p.u) + ' m' : p.y !== null ? 'y: %' + fmt(p.y, 1) : ''}${p.tip ? '<br>Kod: ' + p.tip : ''}${zMetin(p.zemin) ? '<br>Zemin: ' + zMetin(p.zemin) : ''}${p.not ? '<br>Not: ' + esc(p.not) : ''}]]></description>
+      <ExtendedData><Data name="sira"><value>${i + 1}</value></Data><Data name="km"><value>${p.km}</value></Data><Data name="u"><value>${p.u ?? ''}</value></Data><Data name="y"><value>${p.y ?? ''}</value></Data><Data name="kod"><value>${p.tip || ''}</value></Data>${ZN.map((z, j) => `<Data name="${['toprak', 'kusku', 'ykaya', 'skaya', 'cskaya'][j]}"><value>${p.zemin && num(p.zemin[j]) ? p.zemin[j] : ''}</value></Data>`).join('')}<Data name="zaman"><value>${p.zaman || ''}</value></Data></ExtendedData>
+      <Point><coordinates>${p.lon},${p.lat},0</coordinates></Point></Placemark>`).join('');
+  const st = (id, renk) => `<Style id="${id}"><IconStyle><color>${renk}</color><scale>0.9</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle><LabelStyle><scale>0.8</scale></LabelStyle></Style>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${x(ad)}</name>
+<description>${x(k.seflik)} · tespit ${x(k.tarih)} · Saha Tespit v${SURUM}</description>
+<Style id="iz"><LineStyle><color>ff2828c6</color><width>4</width></LineStyle></Style>
+${st('nN', 'ff364d1f')}${st('nKY', 'ff1a96d9')}${st('nKP', 'ffaa248e')}${st('nL', 'ffaa248e')}${st('nS', 'ffaa248e')}${st('nD', 'ffc06515')}
+${k.iz.length > 1 ? `<Placemark><name>GPS izi (${fmt(izUzunluk(k.iz), 0)} m)</name><styleUrl>#iz</styleUrl><LineString><tessellate>1</tessellate><coordinates>${iz}</coordinates></LineString></Placemark>` : ''}
+<Folder><name>Ölçüm noktaları</name>${nk}</Folder>
+</Document></kml>`;
+}
+function formHtml(k) {
+  const P = k.noktalar, zd = zeminDagilim(k);
+  const c = v => v === null || v === undefined || v === '' ? '' : (typeof v === 'number' ? fmt(v) : esc(v));
+  const satir = P.map((p, i) => {
+    const z = (i === 0 && !p.ilkZemin) || zBos(p.zemin) ? [null, null, null, null, null] : p.zemin;
+    return `<tr><td>${i + 1}</td><td class="r">${c(p.km)}</td><td>${kmF(p.km)}</td><td class="r">${c(p.u)}</td><td class="r">${c(p.y)}</td><td class="r">${c(p.egim)}</td><td class="r">${c(p.platform)}</td><td>${p.hendek === 'V' ? 'V' : p.hendek === 'Y' ? 'Y' : ''}</td><td><b>${esc(p.tip || '')}</b></td><td class="r">${c(p.k)}</td><td class="r">${c(p.h)}</td><td class="r">${c(p.h2)}</td>${z.map(v => `<td class="r">${num(v) ? fmt(v, 1) : ''}</td>`).join('')}<td class="r">${c(p.alan)}</td><td class="nt">${esc(p.not || '')}</td></tr>`;
+  }).join('');
+  return `<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>${esc(k.kod)} HK${esc(k.hk)} Saha Tespit Formu</title>
+<style>
+@page{size:A4 portrait;margin:10mm}
+body{font:10px/1.25 Arial,Helvetica,sans-serif;color:#000;margin:0}
+h1{font-size:14px;text-align:center;margin:0 0 6px}
+table{border-collapse:collapse;width:100%}
+.hd td{border:1px solid #000;padding:3px 5px;font-size:11px}.hd td.l{background:#eee;font-weight:bold;width:16%}
+.t th,.t td{border:1px solid #000;padding:2px 3px;text-align:center}
+.t th{background:#e8e8e8;font-size:9px}
+.t td.r{text-align:right;font-variant-numeric:tabular-nums}.t td.nt{text-align:left;font-size:8.5px;max-width:110px}
+.t tr:nth-child(even) td{background:#f7f7f7}
+.t thead{display:table-header-group}.t tr{page-break-inside:avoid}
+.alt{display:flex;gap:10px;margin-top:8px}.alt>div{flex:1}
+.alt table td,.alt table th{border:1px solid #000;padding:2px 4px}.alt th{background:#e8e8e8}
+.nt2{font-size:8.5px;margin-top:6px;color:#333}
+@media screen{body{padding:12px;max-width:210mm;margin:auto}}
+</style></head><body>
+<h1>YENİ ORMAN YOLU — SAHA TESPİT FORMU</h1>
+<table class="hd"><tr><td class="l">Yol kodu</td><td>${esc(k.kod)}</td><td class="l">Şeflik</td><td>${esc(k.seflik)}</td><td class="l">Hakediş no</td><td>${esc(k.hk)}</td></tr>
+<tr><td class="l">Yol adı</td><td colspan="3">${esc(k.ad)}</td><td class="l">Tespit tarihi</td><td>${esc(k.tarih)}</td></tr></table>
+<table class="t" style="margin-top:6px"><thead><tr><th rowspan="2">No</th><th rowspan="2">Mesafe<br>(m)</th><th rowspan="2">Km</th><th rowspan="2">u<br>(m)</th><th rowspan="2">y<br>(%)</th><th rowspan="2">Boy.<br>eğim</th><th rowspan="2">Plat.<br>(m)</th><th rowspan="2">Hen.</th><th rowspan="2">Kod</th><th rowspan="2">k</th><th rowspan="2">h</th><th rowspan="2">h₂</th><th colspan="5">Zemin % (önceki noktadan buraya)</th><th rowspan="2">Alan<br>(m²)</th><th rowspan="2">Not</th></tr>
+<tr><th>T</th><th>K</th><th>YK</th><th>SK</th><th>ÇSK</th></tr></thead><tbody>${satir || '<tr><td colspan="19">Nokta yok</td></tr>'}</tbody></table>
+<div class="nt2">T: Toprak · K: Küskü · YK: Yumuşak kaya · SK: Sert kaya · ÇSK: Çok sert kaya. Kod yazıldığı noktadan sonraki noktaya kadar geçerlidir (KY = 21 m). KY karşılaşma yeri, KP kurp, L lase, D dere geçişi, S sandık yarma.</div>
+<div class="alt"><div><table><tr><th colspan="3">Diğer imalatlar (bu tespit)</th></tr><tr><th>Poz</th><th>Açıklama</th><th>Miktar</th></tr>
+${k.imalat.length ? k.imalat.map(x => `<tr><td>${esc(x.poz)}</td><td>${esc(x.aciklama || '')}</td><td style="text-align:right">${fmt(x.miktar, 3)}</td></tr>`).join('') : '<tr><td colspan="3">—</td></tr>'}</table></div>
+<div><table><tr><th colspan="3">Zemin dağılımı</th></tr><tr><th>Sınıf</th><th>m</th><th>%</th></tr>
+${ZN.map((z, j) => `<tr><td>${z}</td><td style="text-align:right">${fmt(zd.m[j], 0)}</td><td style="text-align:right">${zd.top ? fmt(zd.m[j] / zd.top * 100, 1) : ''}</td></tr>`).join('')}
+${zd.bos ? `<tr><td>Dere (boş)</td><td style="text-align:right">${fmt(zd.bos, 0)}</td><td style="text-align:right">${fmt(zd.bos / zd.top * 100, 1)}</td></tr>` : ''}
+<tr><th>Toplam</th><th style="text-align:right">${fmt(zd.top, 0)}</th><th></th></tr></table></div></div>
+<div class="nt2">Nokta: ${P.length} · Aralık: ${P.length ? kmF(P[0].km) + ' → ' + kmF(P[P.length - 1].km) : '—'} · GPS izi: ${k.iz.length ? fmt(izUzunluk(k.iz), 0) + ' m' : '—'} · Saha Tespit v${SURUM} · Oluşturma ${trTarih()} ${saat(new Date().toISOString())}</div>
+</body></html>`;
+}
+async function indir(blob, ad) {
+  if (ARTIFACT) {
+    try {
+      const d = await window.claude.use('downloads');
+      if (d) { await d.save({ filename: ad, data: blob }); return true; }
+    } catch (e) { console.warn(e); toast('İndirme iptal edildi / yapılamadı'); return false; }
+  }
+  try {
+    const u = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = u; a.download = ad; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(u), 4000); return true;
+  } catch (e) { toast('İndirilemedi'); return false; }
+}
+async function paylas(blob, ad, metin) {
+  const f = new File([blob], ad, { type: blob.type });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: ad, text: metin }); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  toast('Bu tarayıcı dosya paylaşımını desteklemiyor — dosya indiriliyor');
+  indir(blob, ad);
+}
+async function disaAktar(tur) {
+  const k = aktif(); if (!k) return;
+  if (tur === 'json' || tur === 'jsonPay') {
+    const b = new Blob([JSON.stringify(jsonUret(k), null, 1)], { type: 'application/json' });
+    return tur === 'json' ? indir(b, dosyaAdi(k, 'json')) : paylas(b, dosyaAdi(k, 'json'), `${k.kod} HK${k.hk} tespit (sistem)`);
+  }
+  if (tur === 'xlsx' || tur === 'xlsxPay') {
+    let b = null; try { b = xlsxUret(k); } catch (e) { console.warn(e); }
+    if (!b) { // SheetJS yüklenemediyse CSV
+      toast('Excel kütüphanesi yüklenemedi — CSV verildi');
+      const rows = [['Sira', 'Mesafe', 'u', 'y', 'Kod', 'k', 'h', 'h2', ...ZN, 'Not']].concat(k.noktalar.map((p, i) => [i + 1, p.km, p.u, p.y, p.tip, p.k, p.h, p.h2, ...((i === 0 && !p.ilkZemin) || zBos(p.zemin) ? ['', '', '', '', ''] : p.zemin), p.not]));
+      const csv = '﻿' + rows.map(r => r.map(v => v === null || v === undefined ? '' : `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+      return indir(new Blob([csv], { type: 'text/csv' }), dosyaAdi(k, 'csv'));
+    }
+    return tur === 'xlsx' ? indir(b, dosyaAdi(k, 'xlsx')) : paylas(b, dosyaAdi(k, 'xlsx'), `${k.kod} ${k.ad || ''} — HK ${k.hk} saha tespiti (${k.tarih})`);
+  }
+  if (tur === 'kml' || tur === 'kmlPay') {
+    if (!k.iz.length && !k.noktalar.some(p => p.lat != null)) return toast('İz kaydı ve koordinatlı nokta yok');
+    const b = new Blob([kmlUret(k)], { type: 'application/vnd.google-earth.kml+xml' });
+    return tur === 'kml' ? indir(b, dosyaAdi(k, 'kml')) : paylas(b, dosyaAdi(k, 'kml'), `${k.kod} HK${k.hk} GPS izi`);
+  }
+  if (tur === 'yazdir') {
+    const h = formHtml(k);
+    if (ARTIFACT) return indir(new Blob([h], { type: 'text/html' }), dosyaAdi(k, 'html'));
+    const pa = $('#printArea');
+    const doc = new DOMParser().parseFromString(h, 'text/html');
+    pa.innerHTML = '';
+    doc.querySelectorAll('style').forEach(s => { const st = document.createElement('style'); st.textContent = '@media print{' + s.textContent.replace(/@media screen\{[^}]*\}\}?/, '').replace(/(^|\})\s*body\{/g, '$1 #printArea{') + '}'; pa.appendChild(st); });
+    pa.insertAdjacentHTML('beforeend', doc.body.innerHTML);
+    setTimeout(() => { try { window.print(); } catch (e) { toast('Yazdırma açılamadı'); } }, 50);
+  }
+}
+
+/* =====================================================================
+   HAKEDİŞ — sözleşme bilgileri + gömülü şablondan hakediş Excel'i üretme
+   Şablon: YENİYOL_HAKEDİŞ_ŞABLONU.xlsx (sablon.js içinde). Formüllere dokunulmaz;
+   yalnız giriş hücreleri yazılır, tutarlar dosya Excel'de açılınca hesaplanır.
+   Mantık tespit_aktar.py ile aynıdır.
+   ===================================================================== */
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const KAYNAKLAR = ['TOPRAK', 'KÜSKÜ', 'Y.KAYA', 'S.KAYA', 'Ç.S.KAYA', 'TESVİYE TOPRAK', 'TESVİYE KÜSKÜLÜK', 'ELLE'];
+const VARSAYILAN_KALEM = [
+  ['15.001/A', 'Ekskavatörle her cins toprağın kazılması ve kullanılması (yarma ve yan ariyetten dolguya)', 'm³', 'TOPRAK'],
+  ['15.006/A', 'Ekskavatörle her cins küskülük kazılması ve kullanılması', 'm³', 'KÜSKÜ'],
+  ['15.010/A', 'Ekskavatörle yumuşak kayanın kazılması ve kullanılması', 'm³', 'Y.KAYA'],
+  ['15.014/A', 'Ekskavatörle sert kayanın kazılması ve kullanılması', 'm³', 'S.KAYA'],
+  ['15.018/A', 'Ekskavatörle çok sert kayanın kazılması ve kullanılması', 'm³', 'Ç.S.KAYA'],
+  ['15.044/OGM-2', 'Her cins toprak zeminde platform tesviyesi (a=4,00 m)', 'Km', 'TESVİYE TOPRAK'],
+  ['15.045/OGM-2', 'Her cins küskülük zeminde platform tesviyesi (a=4,00 m)', 'Km', 'TESVİYE KÜSKÜLÜK'],
+  ['15.044/OGM-1', 'Her cins toprak zeminde hendek tesviyesi (a=1,00 m)', 'Km', 'TESVİYE TOPRAK'],
+  ['15.045/OGM-1', 'Her cins küskülük zeminde hendek tesviyesi (a=1,00 m)', 'Km', 'TESVİYE KÜSKÜLÜK'],
+  ['14.022/1-K', 'Makine ile kök sökme (10-30 cm çaplı)', 'Adet', 'ELLE'],
+  ['14.022/2-K', 'Makine ile kök sökme (31-50 cm çaplı)', 'Adet', 'ELLE'],
+  ['14.022/3-K', 'Makine ile kök sökme (51-80 cm çaplı)', 'Adet', 'ELLE'],
+  ['14.021/1', 'Makine ile temizleme ve sökme', 'ar', 'ELLE'],
+  ['43.527.1621', 'Ø600 mm çelik takviyeli HDPE spiral boru (SN 12)', 'm', 'ELLE'],
+  ['43.527.1622', 'Ø800 mm çelik takviyeli HDPE spiral boru (SN 12)', 'm', 'ELLE'],
+  ['43.527.1623', 'Ø1000 mm çelik takviyeli HDPE spiral boru (SN 12)', 'm', 'ELLE'],
+  ['43.527.1624', 'Ø1200 mm çelik takviyeli HDPE spiral boru (SN 12)', 'm', 'ELLE']
+].map(([poz, ad, birim, kaynak]) => ({ poz, ad, birim, kaynak, miktar: null, bf: null, ust: null }));
+// [anahtar, etiket, tür, zorunlu, şablondaki ad]
+const SOZ_ALAN = [
+  ['İş ve idare', [
+    ['bolge', 'Orman Bölge Müdürlüğü', 'metin', 1, 'V_Bolge'],
+    ['isletme', 'Orman İşletme Müdürlüğü', 'metin', 1, 'V_Isletme'],
+    ['ekap', 'EKAP (İKN) no', 'metin', 1, 'V_Ekap'],
+    ['yuklenici', 'Yüklenici adı / ticari unvanı', 'metin', 1, 'V_Yuklenici'],
+    ['ihale', 'İhale tarihi', 'tarih', 1, 'V_IhaleTarihi'],
+    ['sozTarih', 'Sözleşme tarihi', 'tarih', 1, 'V_SozTarihi'],
+    ['yerTeslim', 'İşyeri teslim tarihi', 'tarih', 1, 'V_YerTeslim'],
+    ['sure', 'İşin süresi (takvim günü)', 'sayi', 1, 'V_Sure']]],
+  ['İmzalar (hakedişi düzenleyenler)', [
+    ['d1Ad', 'Düzenleyen 1 — adı soyadı', 'metin', 1, 'V_D1Ad'], ['d1Unvan', 'Düzenleyen 1 — unvanı', 'metin', 1, 'V_D1Unvan'],
+    ['d2Ad', 'Düzenleyen 2 — adı soyadı', 'metin', 0, 'V_D2Ad'], ['d2Unvan', 'Düzenleyen 2 — unvanı', 'metin', 0, 'V_D2Unvan'],
+    ['d3Ad', 'Düzenleyen 3 — adı soyadı', 'metin', 0, 'V_D3Ad'], ['d3Unvan', 'Düzenleyen 3 — unvanı', 'metin', 0, 'V_D3Unvan'],
+    ['onayAd', 'Onaylayan (İşletme Müdürü) — adı soyadı', 'metin', 1, 'V_OnayAd'], ['onayUnvan', 'Onaylayan — unvanı (boş = İşletme Müdürü)', 'metin', 0, 'V_OnayUnvan']]],
+  ['Diğer bilgiler (isteğe bağlı)', [
+    ['sozNo', 'Sözleşme no', 'metin', 0, 'V_SozNo'], ['ym', 'Yaklaşık maliyet (TL)', 'sayi', 0, 'V_YM'],
+    ['programUz', 'Program uzunluğu (m)', 'sayi', 0, 'V_ProgramUz'], ['etudNo', 'İşin etüd proje no', 'metin', 0, 'V_EtudNo'],
+    ['isAdi', 'İşin adı (boş = otomatik)', 'metin', 0, 'V_IsAdiElle'], ['tescil', 'Sayıştay tescil tarihi ve no (boş = ----)', 'metin', 0, 'V_Tescil'],
+    ['avansToplam', 'Verilen avanslar toplamı (TL)', 'sayi', 0, 'V_AvansToplam'], ['artisOnay', 'İş artışı onay tarihi ve sayısı', 'metin', 0, 'V_ArtisOnay'],
+    ['cezaBinde', 'Günlük gecikme cezası (binde, boş = hesaplanmaz)', 'sayi', 0, 'V_CezaBinde'],
+    ['gelirV', 'Gelir / kurumlar vergisi kesintisi (%)', 'yuzde', 0, 'V_GelirV'],
+    ['ekTemKes', 'İş artışı ek kesin teminatı hakedişten kesilsin mi?', 'evethayir', 0, 'V_EkTemKes'],
+    ['su1Tarih', 'Süre uzatımı 1 — karar tarihi', 'tarih', 0, 'V_SUTarih#1'], ['su1Sayi', 'Süre uzatımı 1 — sayısı', 'metin', 0, 'V_SUSayi#1'], ['su1Gun', 'Süre uzatımı 1 — gün', 'sayi', 0, 'V_SUGun#1'],
+    ['su2Tarih', 'Süre uzatımı 2 — karar tarihi', 'tarih', 0, 'V_SUTarih#2'], ['su2Sayi', 'Süre uzatımı 2 — sayısı', 'metin', 0, 'V_SUSayi#2'], ['su2Gun', 'Süre uzatımı 2 — gün', 'sayi', 0, 'V_SUGun#2'],
+    ['su3Tarih', 'Süre uzatımı 3 — karar tarihi', 'tarih', 0, 'V_SUTarih#3'], ['su3Sayi', 'Süre uzatımı 3 — sayısı', 'metin', 0, 'V_SUSayi#3'], ['su3Gun', 'Süre uzatımı 3 — gün', 'sayi', 0, 'V_SUGun#3']]],
+  ['Geçici kabul (yalnız son hakedişte; Excel\'de de doldurulabilir)', [
+    ['bitirme', 'İşin bitirildiği tarih', 'tarih', 0, 'V_BitirmeTarihi'], ['dilekce', 'Yüklenicinin bitirme dilekçesi tarihi', 'tarih', 0, 'V_DilekceTarihi'],
+    ['onInceleme', 'Ön inceleme tarihi', 'tarih', 0, 'V_OnIncelemeTarihi'], ['teklifT', 'Geçici kabul teklif belgesi tarihi', 'tarih', 0, 'V_TeklifTarihi'],
+    ['oi1Ad', 'Ön inceleme 1 — adı soyadı', 'metin', 0, 'V_OI1Ad'], ['oi1Unvan', 'Ön inceleme 1 — unvanı', 'metin', 0, 'V_OI1Unvan'],
+    ['oi2Ad', 'Ön inceleme 2 — adı soyadı', 'metin', 0, 'V_OI2Ad'], ['oi2Unvan', 'Ön inceleme 2 — unvanı', 'metin', 0, 'V_OI2Unvan'],
+    ['oi3Ad', 'Ön inceleme 3 — adı soyadı', 'metin', 0, 'V_OI3Ad'], ['oi3Unvan', 'Ön inceleme 3 — unvanı', 'metin', 0, 'V_OI3Unvan'],
+    ['olur', 'Komisyonu kuran makam oluru tarihi', 'tarih', 0, 'V_OlurTarihi'],
+    ['baskanAd', 'Komisyon başkanı — adı soyadı', 'metin', 0, 'V_BaskanAd'], ['baskanUnvan', 'Komisyon başkanı — unvanı', 'metin', 0, 'V_BaskanUnvan'],
+    ['uye1Ad', 'Üye 1 — adı soyadı', 'metin', 0, 'V_Uye1Ad'], ['uye1Unvan', 'Üye 1 — unvanı', 'metin', 0, 'V_Uye1Unvan'],
+    ['uye2Ad', 'Üye 2 — adı soyadı', 'metin', 0, 'V_Uye2Ad'], ['uye2Unvan', 'Üye 2 — unvanı', 'metin', 0, 'V_Uye2Unvan'],
+    ['kabul', 'Komisyonun işyerinde inceleme tarihi', 'tarih', 0, 'V_KabulTarihi'], ['itibar', 'Geçici kabul itibar tarihi (boş = bitirme)', 'tarih', 0, 'V_ItibarTarihi'],
+    ['tutanak', 'Geçici kabul tutanağı tarihi', 'tarih', 0, 'V_TutanakTarihi'], ['ancak', 'ANCAK (eksik / kusur notu)', 'metin', 0, 'V_Ancak']]]
+];
+const KOD_TAM = { '': null, KY: 'KARŞILAŞMA YERİ', KP: 'KURP', L: 'LASE', D: 'DERE GEÇİŞİ', S: 'SANDIK YARMA' };
+const KOD_KISA = { 'NORMAL': '', 'N': '', 'KY': 'KY', 'K': 'KY', 'KARŞILAŞMA': 'KY', 'KARŞILAŞMA YERİ': 'KY', 'KP': 'KP', 'KURP': 'KP', 'L': 'L', 'LASE': 'L',
+  'D': 'D', 'DERE': 'D', 'DERE GEÇİŞİ': 'D', 'S': 'S', 'SANDIK': 'S', 'SANDIK YARMA': 'S' };
+const trUp = s => String(s ?? '').replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase().trim();
+const pozNorm = p => trUp(p).replace(/\s/g, '').replace(/^(KGM|OGM|İLBANK|ILBANK|ÇŞB|CSB)\//, '');
+function pozEs(a, b) { const x = pozNorm(a), y = pozNorm(b); return !!x && !!y && (x === y || x.endsWith('/' + y) || y.endsWith('/' + x)); }
+function trSeri(s) { const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s || ''); return m ? (Date.UTC(+m[3], +m[2] - 1, +m[1]) - Date.UTC(1899, 11, 30)) / 864e5 : null; }
+function seriTr(n) { const d = new Date(Date.UTC(1899, 11, 30) + Math.round(n) * 864e5); return `${pad(d.getUTCDate())}.${pad(d.getUTCMonth() + 1)}.${d.getUTCFullYear()}`; }
+
+/* ---- ZIP (tarayıcının kendi deflate'i ile; kütüphanesiz) ---- */
+const ZipX = {
+  crcT: null,
+  crc(u8) {
+    if (!this.crcT) { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } this.crcT = t; }
+    let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = this.crcT[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0;
+  },
+  async akis(u8, Cls) { const s = new Blob([u8]).stream().pipeThrough(new Cls('deflate-raw')); return new Uint8Array(await new Response(s).arrayBuffer()); },
+  oku(u8) {
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+    let e = u8.length - 22; while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+    if (e < 0) throw new Error('Dosya Excel (xlsx) değil');
+    const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true);
+    const td = new TextDecoder(), L = [];
+    for (let i = 0; i < n; i++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) throw new Error('Excel dosyası bozuk');
+      const yontem = dv.getUint16(p + 10, true), crc = dv.getUint32(p + 16, true), cs = dv.getUint32(p + 20, true), us = dv.getUint32(p + 24, true);
+      const nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true);
+      const ad = td.decode(u8.subarray(p + 46, p + 46 + nl));
+      const d0 = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true);
+      L.push({ ad, yontem, crc, cs, us, ham: u8.subarray(d0, d0 + cs) });
+      p += 46 + nl + el + cl;
+    }
+    return L;
+  },
+  async ac(g) { return g.yontem === 0 ? g.ham : this.akis(g.ham, DecompressionStream); },
+  async yaz(L) {
+    const te = new TextEncoder(), parca = [], merk = []; let ofs = 0;
+    for (const g of L) {
+      if (g.yeni) { g.us = g.yeni.length; g.crc = this.crc(g.yeni); g.ham = await this.akis(g.yeni, CompressionStream); g.cs = g.ham.length; g.yontem = 8; }
+      const ad = te.encode(g.ad), h = new DataView(new ArrayBuffer(30)), c = new DataView(new ArrayBuffer(46));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, g.yontem, true);
+      h.setUint16(12, 0x21, true); h.setUint32(14, g.crc, true); h.setUint32(18, g.cs, true); h.setUint32(22, g.us, true); h.setUint16(26, ad.length, true);
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, g.yontem, true);
+      c.setUint16(14, 0x21, true); c.setUint32(16, g.crc, true); c.setUint32(20, g.cs, true); c.setUint32(24, g.us, true); c.setUint16(28, ad.length, true); c.setUint32(42, ofs, true);
+      parca.push(new Uint8Array(h.buffer), ad, g.ham); merk.push(new Uint8Array(c.buffer), ad);
+      ofs += 30 + ad.length + g.cs;
+    }
+    const ms = merk.reduce((a, x) => a + x.length, 0), s = new DataView(new ArrayBuffer(22));
+    s.setUint32(0, 0x06054b50, true); s.setUint16(8, L.length, true); s.setUint16(10, L.length, true); s.setUint32(12, ms, true); s.setUint32(16, ofs, true);
+    return new Blob([...parca, ...merk, new Uint8Array(s.buffer)], { type: XLSX_MIME });
+  }
+};
+
+/* ---- XLSX: tanımlı adlarla hücre okuma / yazma (biçim ve formüller korunur) ---- */
+const xDec = s => String(s).replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(+n)).replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
+const xEsc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const attr = (tag, a) => { const m = new RegExp('\\s' + a.replace(':', '\\:') + '="([^"]*)"').exec(tag); return m ? xDec(m[1]) : null; };
+const kolNo = c => [...c].reduce((a, ch) => a * 26 + ch.charCodeAt(0) - 64, 0);
+const kolAd = n => { let s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+class Kitap {
+  static async ac(u8) {
+    const k = new Kitap(); k.L = ZipX.oku(u8); k.td = new TextDecoder(); k.xml = {}; k.bekleyen = {}; k.ss = null;
+    const wb = await k.metin('xl/workbook.xml'), rels = await k.metin('xl/_rels/workbook.xml.rels');
+    const R = [...rels.matchAll(/<Relationship\b[^>]*>/g)].map(x => x[0]);
+    k.sayfa = {};
+    for (const m of wb.matchAll(/<sheet\b[^>]*>/g)) {
+      const rid = attr(m[0], 'r:id'), r = R.find(x => attr(x, 'Id') === rid); let t = attr(r, 'Target');
+      k.sayfa[attr(m[0], 'name')] = t.startsWith('/') ? t.slice(1) : 'xl/' + t.replace(/^\.\//, '');
+    }
+    k.adlar = {};
+    for (const m of wb.matchAll(/<definedName\b([^>]*)>([^<]*)<\/definedName>/g)) if (!/localSheetId/.test(m[1])) k.adlar[attr(m[0], 'name')] = xDec(m[2]);
+    return k;
+  }
+  async metin(ad) {
+    if (this.xml[ad] !== undefined) return this.xml[ad];
+    const g = this.L.find(x => x.ad === ad); if (!g) return null;
+    return (this.xml[ad] = this.td.decode(await ZipX.ac(g)));
+  }
+  ref(nm) {   // 'V_SUTarih#2' → aralığın 2. hücresi
+    const [ad, sira] = nm.split('#'), t = this.adlar[ad];
+    if (!t) throw new Error('Şablonda ad yok: ' + ad);
+    const m = /^'?(.+?)'?!\$?([A-Z]+)\$?(\d+)(?::\$?([A-Z]+)\$?(\d+))?$/.exec(t);
+    const r = { sayfa: m[1].replace(/''/g, "'"), c1: kolNo(m[2]), r1: +m[3], c2: kolNo(m[4] || m[2]), r2: +(m[5] || m[3]) };
+    if (sira) { const i = +sira - 1; if (r.c1 === r.c2) { r.r1 = r.r2 = r.r1 + i; } else { r.c1 = r.c2 = r.c1 + i; } }
+    return r;
+  }
+  hucre(nm, dr = 0, dc = 0) { const r = this.ref(nm); return [r.sayfa, kolAd(r.c1 + dc) + (r.r1 + dr)]; }
+  yaz(sayfa, adres, deger) { (this.bekleyen[sayfa] ||= {})[adres] = deger; }
+  yazAd(nm, deger, dr = 0, dc = 0) { const [s, a] = this.hucre(nm, dr, dc); this.yaz(s, a, deger); }
+  static hucreXml(adres, s, v) {
+    const st = s ? ` s="${s}"` : '';
+    if (v === null || v === undefined || v === '') return `<c r="${adres}"${st}/>`;
+    if (typeof v === 'number') return `<c r="${adres}"${st} t="n"><v>${v}</v></c>`;
+    return `<c r="${adres}"${st} t="inlineStr"><is><t xml:space="preserve">${xEsc(v)}</t></is></c>`;
+  }
+  async uygula() {
+    for (const [sayfa, B] of Object.entries(this.bekleyen)) {
+      const yol = this.sayfa[sayfa]; let x = await this.metin(yol);
+      const kalan = { ...B };
+      x = x.replace(/<c r="([A-Z]+\d+)"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g, (tam, a, at) => {
+        if (!(a in kalan)) return tam;
+        const v = kalan[a]; delete kalan[a];
+        return Kitap.hucreXml(a, attr(at, 's'), v);
+      });
+      const satir = {};
+      for (const [a, v] of Object.entries(kalan)) { if (v === null || v === undefined || v === '') continue; const r = +/\d+/.exec(a)[0]; (satir[r] ||= []).push([a, v]); }
+      for (const [r, L] of Object.entries(satir)) {
+        const ek = L.sort((p, q) => kolNo(/[A-Z]+/.exec(p[0])[0]) - kolNo(/[A-Z]+/.exec(q[0])[0]));
+        const rx = new RegExp(`<row r="${r}"([^>]*?)(\\/>|>([\\s\\S]*?)<\\/row>)`);
+        if (rx.test(x)) {
+          x = x.replace(rx, (tam, at, _s, ic) => {
+            const hucreler = [...(ic || '').matchAll(/<c r="([A-Z]+)\d+"[\s\S]*?(?:\/>|<\/c>)/g)].map(m => [kolNo(m[1]), m[0]]);
+            ek.forEach(([a, v]) => hucreler.push([kolNo(/[A-Z]+/.exec(a)[0]), Kitap.hucreXml(a, null, v)]));
+            hucreler.sort((p, q) => p[0] - q[0]);
+            return `<row r="${r}"${at.replace(/\s*spans="[^"]*"/, '')}>${hucreler.map(h => h[1]).join('')}</row>`;
+          });
+        } else {
+          const yeni = `<row r="${r}">${ek.map(([a, v]) => Kitap.hucreXml(a, null, v)).join('')}</row>`;
+          const sonraki = [...x.matchAll(/<row r="(\d+)"/g)].find(m => +m[1] > +r);
+          x = sonraki ? x.slice(0, sonraki.index) + yeni + x.slice(sonraki.index) : x.replace('</sheetData>', yeni + '</sheetData>');
+        }
+      }
+      this.xml[yol] = x;
+    }
+    this.bekleyen = {};
+  }
+  async kaydet() {
+    await this.uygula();
+    const te = new TextEncoder();
+    for (const g of this.L) if (this.xml[g.ad] !== undefined && /worksheets\/|workbook\.xml$/.test(g.ad)) g.yeni = te.encode(this.xml[g.ad]);
+    return ZipX.yaz(this.L);
+  }
+  // ---- okuma (mevcut hakediş dosyasından içe alma)
+  async paylasimli() {
+    if (this.ss) return this.ss;
+    const x = await this.metin('xl/sharedStrings.xml');
+    this.ss = x ? [...x.matchAll(/<si>([\s\S]*?)<\/si>/g)].map(m => [...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(t => xDec(t[1])).join('')) : [];
+    return this.ss;
+  }
+  async harita(sayfa) {
+    this._h ||= {};
+    if (this._h[sayfa]) return this._h[sayfa];
+    const x = await this.metin(this.sayfa[sayfa]), ss = await this.paylasimli(), H = {};
+    for (const m of x.matchAll(/<c r="([A-Z]+\d+)"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+      const t = attr(m[2], 't'), ic = m[3] || '';
+      if (/<f[ >]/.test(ic) && !/<v>/.test(ic)) continue;
+      let v = null;
+      if (t === 'inlineStr') v = [...ic.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(q => xDec(q[1])).join('');
+      else { const vm = /<v>([\s\S]*?)<\/v>/.exec(ic); if (vm) v = t === 's' ? ss[+vm[1]] : (t === 'str' || t === 'e') ? xDec(vm[1]) : t === 'b' ? vm[1] === '1' : Number(vm[1]); }
+      if (v !== null && v !== '') H[m[1]] = v;
+    }
+    return (this._h[sayfa] = H);
+  }
+  async oku(nm, dr = 0, dc = 0) { const [s, a] = this.hucre(nm, dr, dc); return (await this.harita(s))[a] ?? null; }
+}
+
+/* ---- şablonu yükle (sablon.js) ---- */
+async function sablonAl() {
+  if (!window.SABLON_YY_B64) {
+    await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'sablon.js'; s.onload = res; s.onerror = () => rej(new Error('Hakediş şablonu (sablon.js) yüklenemedi')); document.head.appendChild(s); });
+  }
+  const b = atob(window.SABLON_YY_B64), u = new Uint8Array(b.length);
+  for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+  return u;
+}
+
+/* ---- sözleşme kaydı (kod başına bir tane) ---- */
+const sozId = kod => 'SOZ:' + String(kod || '').trim();
+function sozAl(kod) { return S.soz[sozId(kod)] || null; }
+function sozYeni(k) { return { id: sozId(k.kod), tur: 'soz', kod: k.kod, kalemler: VARSAYILAN_KALEM.map(x => ({ ...x })), onayUnvan: '' }; }
+const kalemVar = x => x.poz && (num(x.miktar) || num(x.bf) !== null && num(x.bf) !== undefined && x.miktar !== null);
+function sozKalemler(s) { return (s?.kalemler || []).filter(x => x.poz && (num(x.miktar) > 0 || num(x.bf) > 0)); }
+function sozBedel(s) { return sozKalemler(s).reduce((a, x) => a + Math.round((num(x.miktar) || 0) * (num(x.bf) || 0) * 100) / 100, 0); }
+function sozEksik(s) {
+  if (!s) return ['Sözleşme bilgileri girilmedi'];
+  const E = [];
+  SOZ_ALAN.forEach(([, L]) => L.forEach(([k, et, , z]) => { if (z && (s[k] === null || s[k] === undefined || String(s[k]).trim() === '')) E.push(et); }));
+  const K = sozKalemler(s);
+  if (!K.length) E.push('Teklif cetveli (en az bir kalemin miktarı ve birim fiyatı)');
+  K.forEach(x => { if (!(num(x.miktar) > 0) || num(x.bf) === null) E.push(`${x.poz}: miktar ve birim fiyat`); });
+  if (K.length > 25) E.push('Teklif cetveli en çok 25 kalem olabilir');
+  return E;
+}
+
+/* ---- sözleşme ekranı ---- */
+function sozlesmeAc(k) {
+  const s = JSON.parse(JSON.stringify(sozAl(k.kod) || sozYeni(k)));
+  const alanHtml = ([key, et, tur, z]) => {
+    const v = s[key] ?? '';
+    let inp;
+    if (tur === 'tarih') inp = `<input class="i" type="date" data-k="${key}" value="${trToIso(v)}">`;
+    else if (tur === 'evethayir') inp = `<select class="i" data-k="${key}"><option value="">HAYIR (varsayılan)</option><option ${v === 'EVET' ? 'selected' : ''}>EVET</option></select>`;
+    else inp = `<input class="i" data-k="${key}" ${tur === 'metin' ? '' : 'inputmode="decimal"'} value="${esc(v)}" autocomplete="off">`;
+    return `<label class="f">${esc(et)}${z ? ' <b style="color:var(--err)">*</b>' : ''}</label>${inp}`;
+  };
+  const sh = sayfa(`Sözleşme · ${esc(k.kod)}`, `
+    <div class="msg o">Bir kez girilir; bu yolun tüm hakedişlerinde kullanılır. <b style="color:var(--err)">*</b> zorunlu.</div>
+    <div class="sec"><div class="lbl">Yol</div><div class="kv"><span>Kod</span><b>${esc(k.kod)}</b><span>Şeflik</span><b>${esc(k.seflik || '—')}</b><span>Yol adı</span><b>${esc(k.ad || '—')}</b></div><div class="mut" style="margin-top:6px">Bu üç bilgi tespit kaydından gelir (Yollar → ⋯ → Yol bilgileri).</div></div>
+    ${SOZ_ALAN.map(([bas, L], gi) => gi < 2 ? `<div class="sec"><div class="lbl">${esc(bas)}</div>${L.map(alanHtml).join('')}</div>`
+      : `<details class="t" style="margin-bottom:10px"><summary>${esc(bas)}</summary>${L.map(alanHtml).join('')}<div style="height:12px"></div></details>`).join('')}
+    <div class="sec"><div class="lbl">Teklif birim fiyat cetveli <span class="mut" id="sBedel"></span></div>
+      <div class="mut" style="margin-bottom:8px">Sözleşmedeki kalemlerin miktar ve teklif birim fiyatını girin. Boş bırakılan kalem sözleşmede yok sayılır.</div>
+      <div id="sKal"></div>
+      <button class="btn" style="width:100%;margin-top:8px" id="sKalEkle">+ Kalem ekle</button>
+    </div>
+    <div id="sMsg"></div>`, `<button class="btn p big" id="sKay">Kaydet</button>`);
+  const $$ = q => $(q, sh);
+  function kalemCiz() {
+    $$('#sKal').innerHTML = s.kalemler.map((x, i) => {
+      const t = Math.round((num(x.miktar) || 0) * (num(x.bf) || 0) * 100) / 100, var_ = num(x.miktar) > 0 || num(x.bf) > 0;
+      return `<div class="card" style="padding:10px;${var_ ? '' : 'opacity:.62'}">
+        <div class="row" style="align-items:flex-start;gap:6px"><div style="flex:1"><b>${esc(x.poz)}</b> <span class="tag" style="background:var(--g3);color:var(--g)">${esc(x.kaynak)}</span><br><span class="mut">${esc(x.ad)} · ${esc(x.birim)}</span></div>
+        <button class="btn" style="flex:none;min-height:36px;padding:4px 10px" data-kd="${i}">✎</button></div>
+        <div class="row" style="margin-top:6px"><div><label class="f" style="margin-top:2px">Sözleşme miktarı</label><input class="i" inputmode="decimal" data-km="${i}" value="${x.miktar ?? ''}"></div>
+        <div><label class="f" style="margin-top:2px">Teklif BF (TL)</label><input class="i" inputmode="decimal" data-kb="${i}" value="${x.bf ?? ''}"></div></div>
+        ${var_ ? `<div class="mut" style="text-align:right;margin-top:4px">Tutar <b>${fmt(t)}</b> TL</div>` : ''}</div>`;
+    }).join('');
+    $$('#sBedel').innerHTML = `Bedel <b>${fmt(sozBedel(s))} TL</b>`;
+  }
+  sh.addEventListener('change', e => {
+    const t = e.target;
+    if (t.dataset.km !== undefined) { s.kalemler[+t.dataset.km].miktar = num(t.value); kalemCiz(); }
+    if (t.dataset.kb !== undefined) { s.kalemler[+t.dataset.kb].bf = num(t.value); kalemCiz(); }
+  });
+  sh.addEventListener('click', e => { const b = e.target.closest('[data-kd]'); if (b) kalemDuzenle(+b.dataset.kd); });
+  function kalemDuzenle(i) {
+    const yeni = i === undefined, x = yeni ? { poz: '', ad: '', birim: '', kaynak: 'ELLE', miktar: null, bf: null, ust: null } : { ...s.kalemler[i] };
+    const d = sayfa(yeni ? 'Kalem ekle' : 'Kalem', `<div class="sec">
+      <label class="f">Poz no</label><input class="i" id="kP" value="${esc(x.poz)}">
+      <label class="f">İşin cinsi</label><textarea class="i" id="kA" rows="2">${esc(x.ad)}</textarea>
+      <div class="row"><div><label class="f">Birim</label><input class="i" id="kB" value="${esc(x.birim)}"></div>
+      <div><label class="f">Miktar kaynağı</label><select class="i" id="kK">${KAYNAKLAR.map(o => `<option ${o === x.kaynak ? 'selected' : ''}>${o}</option>`).join('')}</select></div></div>
+      <div class="mut" style="margin-top:6px">Kazı ve tesviye kalemleri metrajdan otomatik gelir; kök sökme, boru gibi kalemler ELLE (saha tespitindeki “İmalatlar”dan).</div>
+      <label class="f">Revize BF üst sınırı (TL, isteğe bağlı)</label><input class="i" id="kU" inputmode="decimal" value="${x.ust ?? ''}"></div>
+      ${yeni ? '' : '<button class="btn d" style="width:100%" id="kSil">Kalemi sil</button>'}`, `<button class="btn p big" id="kKay">Tamam</button>`);
+    $('#kKay', d).onclick = () => {
+      x.poz = $('#kP', d).value.trim(); x.ad = $('#kA', d).value.trim(); x.birim = $('#kB', d).value.trim(); x.kaynak = $('#kK', d).value; x.ust = num($('#kU', d).value);
+      if (!x.poz || !x.ad) return toast('Poz no ve işin cinsi gerekli');
+      if (yeni) s.kalemler.push(x); else s.kalemler[i] = x;
+      d.kapat(); kalemCiz();
+    };
+    if (!yeni) $('#kSil', d).onclick = () => { s.kalemler.splice(i, 1); d.kapat(); kalemCiz(); };
+  }
+  $$('#sKalEkle').onclick = () => kalemDuzenle();
+  kalemCiz();
+  $$('#sKay').onclick = async () => {
+    sh.querySelectorAll('[data-k]').forEach(el => {
+      const spec = SOZ_ALAN.flatMap(g => g[1]).find(a => a[0] === el.dataset.k), tur = spec[2];
+      const v = el.value.trim();
+      s[el.dataset.k] = tur === 'tarih' ? (v ? isoToTr(v) : null) : (tur === 'sayi' || tur === 'yuzde') ? num(v) : (v || null);
+    });
+    s.kod = k.kod; s.id = sozId(k.kod); s.tur = 'soz';
+    S.soz[s.id] = s; await kaydet(s, 'sözleşme');
+    const E = sozEksik(s);
+    sh.kapat(); render();
+    toast(E.length ? `Kaydedildi — ${E.length} zorunlu alan eksik` : 'Sözleşme kaydedildi');
+  };
+}
+
+/* ---- hakediş için etüd zinciri (HK1..N) ---- */
+function hkZincir(k) {
+  const n = +k.hk, H = [], U = [], kayit = [];
+  for (let j = 1; j <= n; j++) {
+    const L = S.kayitlar.filter(x => x.kod === k.kod && +x.hk === j);
+    if (!L.length) { H.push(`HK ${j} tespit kaydı bu cihazda yok`); continue; }
+    if (L.length > 1 && !L.includes(k)) U.push(`HK ${j} için ${L.length} kayıt var; en son güncellenen kullanıldı`);
+    kayit.push(L.includes(k) ? k : L.sort((a, b) => (b.guncelleme || '').localeCompare(a.guncelleme || ''))[0]);
+  }
+  if (H.length) return { H, U, satir: [], kayit };
+  const satir = [];
+  for (const r of kayit) {
+    const kt = kontrol(r);
+    kt.H.forEach(h => H.push(`HK ${r.hk}: ${h.m}`));
+    let P = r.noktalar.map(p => ({ ...p, zemin: zBos(p.zemin) ? null : p.zemin.map(v => num(v) || null) }));
+    if (satir.length && P.length) {
+      const son = satir[satir.length - 1], f0 = P[0];
+      if (Math.abs(f0.km - son.km) < 0.005) P = P.slice(1);
+      else if (f0.km < son.km) H.push(`HK ${r.hk}: ${kmF(f0.km)} ile başlıyor, HK ${son.hk} ${kmF(son.km)}'de bitmiş (çakışma)`);
+      else if (zBos(f0.zemin)) H.push(`HK ${r.hk}: önceki hakediş ${kmF(son.km)}'de bitmiş, bu tespit ${kmF(f0.km)}'den başlıyor; aradaki zemin yok`);
+    } else if (!satir.length && P.length) P[0].zemin = null;
+    P.forEach(p => { p.hk = +r.hk; satir.push(p); });
+  }
+  for (let i = 1; i < satir.length; i++) if (zBos(satir[i].zemin) && satir[i - 1].tip === 'D') {
+    satir[i].zemin = [100, null, null, null, null];
+    U.push(`${kmF(satir[i - 1].km)}–${kmF(satir[i].km)} dere geçişi: zemin yok, tesviye için toprak %100 alındı (kazı 0)`);
+  }
+  if (satir.length > 400) H.push(`Etüd karnesi kapasitesi (400 nokta) aşılıyor`);
+  return { H, U, satir, kayit };
+}
+
+/* ---- hakediş Excel'i üret ---- */
+async function hakedisUret(k) {
+  const s = sozAl(k.kod), E = sozEksik(s);
+  if (E.length) throw new Error('Sözleşme eksik: ' + E.slice(0, 4).join(', ') + (E.length > 4 ? ` (+${E.length - 4})` : ''));
+  const z = hkZincir(k);
+  if (z.H.length) throw new Error(z.H.slice(0, 4).join(' · '));
+  const n = +k.hk;
+  if (n > 12) throw new Error('Şablon en çok 12 hakediş tutar');
+  const K = sozKalemler(s);
+  const kb = await Kitap.ac(await sablonAl());
+  // VERİLER
+  kb.yazAd('V_Seflik', k.seflik || null); kb.yazAd('V_YolKod', String(k.kod)); kb.yazAd('V_YolAdi', k.ad || null);
+  SOZ_ALAN.forEach(([, L]) => L.forEach(([key, , tur, , vn]) => {
+    let v = s[key];
+    if (v === null || v === undefined || v === '') return;
+    if (tur === 'tarih') v = trSeri(v); else if (tur === 'sayi') v = num(v); else if (tur === 'yuzde') v = num(v) / 100;
+    if (v === null) return;
+    kb.yazAd(vn, v);
+  }));
+  // SÖZLEŞME (sıkıştırılmış)
+  for (let i = 0; i < 25; i++) {
+    const x = K[i];
+    kb.yazAd('S_Poz', x ? x.poz : null, i); kb.yazAd('S_Ad', x ? x.ad : null, i); kb.yazAd('S_Birim', x ? x.birim : null, i);
+    kb.yazAd('S_Q0', x ? num(x.miktar) : null, i); kb.yazAd('S_BF', x ? num(x.bf) : null, i);
+    kb.yazAd('S_Kaynak', x ? x.kaynak : null, i); kb.yazAd('S_Ust', x ? num(x.ust) : null, i);
+  }
+  // HAKEDİŞLER
+  z.kayit.forEach(r => {
+    const j = +r.hk - 1;
+    kb.yazAd('G_Tarih', trSeri(r.tarih), 0, j);
+    kb.yazAd('G_Tur', r === k ? (k.hkTur || 'ARA') : (r.hkTur || 'ARA'), 0, j);
+    if (num(r.hkSgk)) kb.yazAd('G_SGK', num(r.hkSgk), 0, j);
+    if (num(r.hkMakine)) kb.yazAd('G_Makine', num(r.hkMakine), 0, j);
+    if (num(r.hkAvans)) kb.yazAd('G_Avans', num(r.hkAvans), 0, j);
+  });
+  // ETÜD KARNESİ
+  const [es, ] = kb.hucre('E_Km'), r0 = kb.ref('E_Km').r1, hkKol = kolAd(kb.ref('E_Hk').c1);
+  z.satir.forEach((p, i) => {
+    const r = r0 + i, w = (c, v) => kb.yaz(es, c + r, v === undefined ? null : v);
+    w('B', p.km); w('D', p.u); w('E', p.y); w('F', p.egim); w('G', p.platform);
+    w('H', p.hendek === 'V' ? 'VAR' : p.hendek === 'Y' ? 'YOK' : null); w('I', KOD_TAM[p.tip || ''] || null);
+    w('J', p.k); w('K', p.h); w('L', p.h2);
+    'MNOPQ'.split('').forEach((c, j) => w(c, i === 0 || !p.zemin ? null : (num(p.zemin[j]) || null)));
+    w('R', p.alan); w('S', p.not || null); w(hkKol, p.hk);
+  });
+  // MİKTARLAR — ELLE kalemlerin kümülatif miktarı
+  const uy = [...z.U], cum = {};
+  z.kayit.forEach(r => {
+    const j = +r.hk;
+    (r.imalat || []).forEach(im => {
+      const i = K.findIndex(x => pozEs(x.poz, im.poz));
+      if (i < 0) { if (r === k) uy.push(`İmalat ${im.poz} sözleşmede yok — aktarılmadı`); return; }
+      cum[i] = (cum[i] || 0) + (num(im.miktar) || 0);
+    });
+    Object.entries(cum).forEach(([i, v]) => kb.yazAd('MK_Elle', Math.round(v * 1000) / 1000, +i, j - 1));
+  });
+  const blob = await kb.kaydet();
+  return { blob, uyarilar: uy, ad: hkDosyaAdi(k, s) };
+}
+function hkDosyaAdi(k, s) { return `${String(k.kod).replace(/[\\/:*?"<>|\s]+/g, '_')}_${trUp(s?.isletme || 'İŞLETME').replace(/\s+/g, '_')}_YENİYOL_HK${k.hk}.xlsx`; }
+
+/* ---- mevcut hakediş dosyasından içe alma (sözleşme + önceki tespitler) ---- */
+async function hkDosyaIceAl(u8, adi) {
+  const kb = await Kitap.ac(u8);
+  if (!kb.adlar.V_YolKod || !kb.adlar.E_Km) throw new Error('Bu dosya Yeni Yol hakediş şablonu değil');
+  const v = nm => kb.oku(nm);
+  const kod = String((await v('V_YolKod')) ?? '').trim();
+  if (!kod) throw new Error('Dosyada yol kodu yok');
+  const seflik = (await v('V_Seflik')) || '', ad = (await v('V_YolAdi')) || '';
+  const s = { id: sozId(kod), tur: 'soz', kod, kalemler: [] };
+  for (const [, L] of SOZ_ALAN) for (const [key, , tur, , vn] of L) {
+    let x = await v(vn); if (x === null || x === '') continue;
+    if (tur === 'tarih') x = typeof x === 'number' ? seriTr(x) : String(x);
+    else if (tur === 'yuzde') x = Math.round(x * 1e6) / 1e4;
+    else if (tur === 'metin') x = String(x);
+    s[key] = x;
+  }
+  for (let i = 0; i < 25; i++) {
+    const poz = await kb.oku('S_Poz', i); if (!poz) continue;
+    s.kalemler.push({ poz: String(poz), ad: String((await kb.oku('S_Ad', i)) || ''), birim: String((await kb.oku('S_Birim', i)) || ''),
+      kaynak: trUp((await kb.oku('S_Kaynak', i)) || 'ELLE'), miktar: num(await kb.oku('S_Q0', i)), bf: num(await kb.oku('S_BF', i)), ust: num(await kb.oku('S_Ust', i)) });
+  }
+  // hakediş geçmişi
+  const tar = [];
+  for (let j = 0; j < 12; j++) { const t = await kb.oku('G_Tarih', 0, j); if (t !== null && t !== '') tar[j] = typeof t === 'number' ? seriTr(t) : String(t); }
+  const son = tar.length;
+  const er = kb.ref('E_Km'), es = er.sayfa, H = await kb.harita(es), hkKol = kolAd(kb.ref('E_Hk').c1);
+  const pts = [];
+  for (let r = er.r1; r <= er.r2; r++) {
+    const g = c => H[c + r] ?? null; if (g('B') === null) continue;
+    const hk = num(g(hkKol)) || Math.max(son, 1);
+    const tip = KOD_KISA[trUp(g('I') || '')] ?? '';
+    const hd = trUp(g('H') || '');
+    const zm = 'MNOPQ'.split('').map(c => num(g(c)));
+    pts.push({ km: num(g('B')), u: num(g('D')), y: num(g('E')), egim: num(g('F')), platform: num(g('G')), hendek: hd.startsWith('V') ? 'V' : hd.startsWith('Y') ? 'Y' : null,
+      tip, k: num(g('J')), h: num(g('K')), h2: num(g('L')), zemin: zm.some(x => x) ? zm : null, alan: num(g('R')), not: g('S') ? String(g('S')) : '',
+      lat: null, lon: null, acc: null, zaman: null, ilkZemin: false, _hk: hk });
+  }
+  const yeniK = [];
+  if (son) for (let j = 1; j <= son; j++) {
+    const P = pts.filter(p => p._hk === j).map(({ _hk, ...p }) => p);
+    if (j > 1 && P.length && !zBos(P[0].zemin)) P[0].ilkZemin = true;
+    const imalat = [];
+    for (let i = 0; i < s.kalemler.length; i++) {
+      const c = num(await kb.oku('MK_Elle', i, j - 1)), o = j > 1 ? num(await kb.oku('MK_Elle', i, j - 2)) : null;
+      // boş hücre önceki hakedişin miktarını taşır
+      let cur = c, onc = 0;
+      if (j > 1) { for (let q = j - 2; q >= 0; q--) { const x = num(await kb.oku('MK_Elle', i, q)); if (x !== null) { onc = x; break; } } }
+      if (cur === null) continue;
+      const d = Math.round((cur - onc) * 1000) / 1000;
+      if (d) imalat.push({ poz: s.kalemler[i].poz, aciklama: s.kalemler[i].ad, miktar: d });
+    }
+    const tur = await kb.oku('G_Tur', 0, j - 1);
+    yeniK.push({ id: uid(), kod, seflik, ad, hk: j, tarih: tar[j - 1] || trTarih(), noktalar: P, imalat, iz: [], hkTur: trUp(tur || 'ARA') === 'SON' ? 'SON' : 'ARA',
+      aktarildi: adi, olusturma: new Date().toISOString() });
+  }
+  return { s, kayitlar: yeniK, kod, seflik, ad, son, nokta: pts.length };
+}
+
+/* ---- hakediş kartı (Özet ekranında) ---- */
+function hkKart(k) {
+  const s = sozAl(k.kod), E = sozEksik(s), z = hkZincir(k);
+  const K = sozKalemler(s);
+  return `<div class="card"><h2>Hakediş (HK ${esc(k.hk)})</h2>
+    ${E.length ? `<div class="msg e">Sözleşme bilgileri eksik (${E.length}): ${esc(E.slice(0, 3).join(', '))}${E.length > 3 ? '…' : ''}</div>`
+      : `<div class="msg o">Sözleşme: ${K.length} kalem · bedel <b>${fmt(sozBedel(s))} TL</b></div>`}
+    <button class="btn" style="width:100%" data-act="soz">${s ? 'Sözleşme bilgileri' : 'Sözleşme bilgilerini gir'}</button>
+    <div class="mut" style="margin:10px 0 4px">Etüd karnesi: ${z.kayit.map(r => `HK${r.hk} ✓`).join(' · ') || '—'}${z.satir.length ? ` · toplam ${z.satir.length} nokta` : ''}</div>
+    ${z.H.map(h => `<div class="msg e">✕ ${esc(h)}</div>`).join('')}
+    ${z.U.map(h => `<div class="msg w">! ${esc(h)}</div>`).join('')}
+    <label class="f">Hakediş türü</label>
+    <div class="seg" id="hkTur"><button data-t="ARA" class="${(k.hkTur || 'ARA') === 'ARA' ? 'on' : ''}">ARA</button><button data-t="SON" class="${k.hkTur === 'SON' ? 'on' : ''}">SON</button></div>
+    <div class="mut" style="margin-top:6px">Hakediş tarihi = tespit tarihi (${esc(k.tarih)}). Excel'de HAKEDİŞLER sayfasından değiştirilebilir.</div>
+    <details class="t"><summary>Bu hakedişteki kesintiler (isteğe bağlı)</summary>
+      <label class="f">SGK kesintisi (TL)</label><input class="i" inputmode="decimal" data-hk="hkSgk" value="${k.hkSgk ?? ''}">
+      <label class="f">İdare makinesi kirası (TL)</label><input class="i" inputmode="decimal" data-hk="hkMakine" value="${k.hkMakine ?? ''}">
+      <label class="f">Avans mahsubu (TL)</label><input class="i" inputmode="decimal" data-hk="hkAvans" value="${k.hkAvans ?? ''}">
+      <div style="height:12px"></div></details>
+    <div class="btns" style="margin-top:12px">
+      <button class="btn p" data-act="hkIndir" ${E.length || z.H.length ? 'disabled' : ''}>Hakediş Excel indir</button>
+      <button class="btn a" data-act="hkPay" ${E.length || z.H.length || ARTIFACT ? 'disabled' : ''}>Hakediş paylaş<br><span style="font-weight:400;font-size:12px">WhatsApp vb.</span></button>
+    </div>
+    <div class="mut" style="margin-top:8px">Dosya hakediş şablonunun tamamıdır (rapor, icmal, yapılan işler…). Tutarlar dosya Excel'de açılınca hesaplanır.</div>
+  </div>`;
+}
+async function hkCikti(paylas_) {
+  const k = aktif(); if (!k) return;
+  toast('Hakediş hazırlanıyor…', 4000);
+  try {
+    const r = await hakedisUret(k);
+    if (r.uyarilar.length) toast(r.uyarilar[0], 4000);
+    if (paylas_) await paylas(r.blob, r.ad, `${k.kod} ${k.ad || ''} — ${k.hk} nolu ${k.hkTur === 'SON' ? 'son' : 'ara'} hakediş`);
+    else await indir(r.blob, r.ad);
+  } catch (e) { console.error(e); toast('Hakediş üretilemedi: ' + e.message, 6000); }
+}
+
+const SY_PARAM={"V_KafaKal": 0.4, "V_KafaBoy": 2.8, "V_KafaYuk": 1.6, "V_KDDusCap": 12, "V_KDDusAra": 0.2, "V_KDYatCap": 10, "V_KDYatAra": 0.2, "V_KDKanca": 0.3, "V_KDTakAdet": 4, "V_BoruDisOran": 1.13, "V_CalPayK": 0.5, "V_TuvGen": 0.2, "V_TuvYuk": 0.4, "V_BlokajGenB": 1.0, "V_BlokajKalB": 0.2, "V_TokmakB": 1.5, "V_CalPayM": 0.5, "V_BlokajGenM": 1.5, "V_BlokajKalM": 0.15, "V_MenfezKalipOde": "HAYIR", "V_BordurA": 0.3, "V_BordurB": 0.3, "V_BordurDemir": 6.5, "V_KanatKal": 0.4, "V_KanatOran": 1.5, "V_KanatUc": 0.5, "V_KanatTemelG": 0.8, "V_KanatTemelK": 0.3, "V_ParafuyD": 0.65, "V_ParafuyK": 0.3, "V_KaziGenEk": 2.0, "V_HendekBoy": 60.0, "V_HendekKesit": 0.18, "V_SuCukuru": 1.0, "V_Heyelan": 10.0, "V_GroOran": 0.6666666666666666, "V_K": 2365, "V_Ii": 0.5, "V_Nn": 0.5, "V_YTas": 1.8, "V_YBoru": 1.0};
+const SY_TIP=[[1, 1.0, 1.0, 18, 18, 18, 0.85, 55.35, 14.566, 40.784, 5.72], [1, 1.0, 1.5, 19, 19, 18, 1.057, 69.73, 14.561, 55.169, 7.76], [1, 1.5, 1.0, 20, 20, 20, 1.16, 79.903, 55.608, 24.295, 6.3], [1, 1.5, 1.5, 20, 20, 20, 1.36, 100.283, 62.742, 37.541, 8.3], [1, 1.5, 2.0, 20, 20, 20, 1.56, 104.539, 63.923, 40.616, 10.3], [1, 2.0, 1.0, 22, 22, 20, 1.456, 116.816, 84.893, 31.923, 6.88], [1, 2.0, 1.5, 22, 22, 20, 1.656, 113.002, 91.498, 21.504, 8.88], [1, 2.0, 2.0, 23, 22, 20, 1.88, 136.915, 99.768, 37.147, 10.9], [1, 2.0, 2.5, 23, 22, 20, 2.08, 148.819, 105.475, 43.344, 12.9], [1, 2.5, 1.0, 24, 22, 20, 1.734, 155.661, 124.394, 31.267, 7.42], [1, 2.5, 1.5, 25, 22, 20, 1.963, 158.987, 129.138, 29.849, 9.44], [1, 2.5, 2.0, 25, 22, 20, 2.163, 175.044, 130.095, 44.949, 11.44], [1, 2.5, 2.5, 25, 23, 21, 2.452, 181.864, 129.524, 52.34, 13.46], [1, 2.5, 3.0, 25, 23, 21, 2.662, 193.023, 137.415, 55.608, 15.46], [1, 3.0, 1.0, 25, 24, 22, 2.126, 201.42, 162.509, 38.911, 7.98], [1, 3.0, 1.5, 26, 24, 22, 2.38, 202.335, 160.384, 41.951, 10.0], [1, 3.0, 2.0, 27, 24, 22, 2.634, 194.177, 159.839, 34.338, 12.02], [1, 3.0, 2.5, 27, 24, 22, 2.854, 221.989, 166.04, 55.949, 14.02], [1, 3.0, 3.0, 27, 24, 22, 3.074, 239.589, 178.41, 61.179, 16.02], [2, 1.0, 1.0, 18, 18, 17, 0.822, 29.857, 0.0, 29.857, 5.72], [2, 1.0, 1.5, 18, 18, 17, 0.992, 50.432, 0.0, 50.432, 7.72], [2, 1.5, 1.0, 18, 18, 17, 1.002, 42.231, 0.0, 42.231, 6.22], [2, 1.5, 1.5, 18, 18, 18, 1.21, 48.091, 0.0, 48.091, 8.22], [2, 1.5, 2.0, 18, 18, 18, 1.39, 67.42, 0.0, 67.42, 10.22], [2, 2.0, 1.0, 18, 18, 17, 1.182, 67.886, 24.465, 43.421, 6.72], [2, 2.0, 1.5, 18, 18, 17, 1.352, 70.752, 26.129, 44.623, 8.72], [2, 2.0, 2.0, 18, 18, 20, 1.664, 79.431, 27.832, 51.599, 10.72], [2, 2.0, 2.5, 18, 18, 20, 1.864, 101.267, 27.854, 73.413, 12.72], [2, 2.5, 1.0, 20, 20, 17, 1.476, 100.809, 69.728, 31.081, 7.3], [2, 2.5, 1.5, 20, 20, 17, 1.646, 105.311, 74.311, 31.0, 9.3], [2, 2.5, 2.0, 20, 20, 18, 1.864, 112.836, 79.455, 33.381, 11.3], [2, 2.5, 2.5, 20, 20, 20, 2.16, 154.284, 96.458, 57.826, 13.3], [2, 2.5, 3.0, 20, 20, 20, 2.36, 166.804, 101.825, 64.979, 15.3], [2, 3.0, 1.0, 20, 20, 17, 1.676, 159.989, 114.117, 45.872, 7.8], [2, 3.0, 1.5, 20, 20, 17, 1.846, 167.991, 116.545, 51.446, 9.8], [2, 3.0, 2.0, 20, 20, 18, 2.064, 180.526, 124.266, 56.26, 11.8], [2, 3.0, 2.5, 20, 20, 20, 2.36, 193.701, 132.626, 61.075, 13.8], [2, 3.0, 3.0, 20, 20, 20, 2.56, 231.381, 176.687, 54.694, 15.8]];
+const SY_KALEM=[["KZ", "KGM/14.220", "Her derinlikte, her cins ve klastaki zeminde kuruda veya su altında menfez büzü ve kafa hendekleri ile bilumum kanalların dar derivasyon şeklindeki kısımlarının kazılması", "m³", 366.94], ["B40", "İL/43.527.1004", "Ø 400 mm koruge boru temini ve döşenmesi", "m", 2748.13], ["B60", "İL/43.527.1006", "Ø 600 mm koruge boru temini ve döşenmesi", "m", 2809.78], ["B80", "İL/43.527.1008", "Ø 800 mm koruge boru temini ve döşenmesi", "m", 4259.56], ["B100", "İL/43.527.1010", "Ø 1000 mm koruge boru temini ve döşenmesi", "m", null], ["B120", "İL/43.527.1624", "Ø 1200 mm boru temini ve döşenmesi (SN 12)", "m", 13028.78], ["GRO", "KGM/16.100/K-H", "Her türlü inşaat temellerinde (köprü temelleri hariç) kuruda veya suda her dozda demirsiz beton (C 16/20 hazır beton harcı ile, her türlü nakliye dahil)", "m³", 3366.74], ["BD", "KGM/16.120/K-H", "Her türlü inşaatta temel dışında kuruda veya suda her dozda demirsiz beton (C 25/30 hazır beton harcı ile, her türlü nakliye dahil)", "m³", 4066.5], ["BA", "KGM/16.132/K-H", "Kutu menfezlerde kuruda veya suda her dozda demirli beton (C 25/30 hazır beton harcı ile)", "m³", 7759.48], ["DI", "KGM/23.001/K", "Betonarme için Ø 6-12 mm'lik yuvarlak demir temini ve işçiliği (nakliye hariç)", "Ton", 61819.93], ["DK", "KGM/23.002/K", "Betonarme için Ø 14 mm ve daha büyük çaptaki yuvarlak demir temini ve işçiliği (nakliye hariç)", "Ton", 56573.68], ["KAL", "15.180.1003", "Plywood ile düz yüzeyli betonarme kalıbı yapılması", "m²", 1028.33], ["ISK", "15.185.1005", "Çelik borudan kalıp iskelesi yapılması (0,00-4,00 m arası)", "m³", 127.75], ["KAT", "KGM/25.052", "Katran badana yapılması", "m²", 156.75], ["TUV", "KGM/6020", "Kırılmamış ve elenmemiş çakıllı (tüvenan) malzeme ile alttemel yapılması", "m³", 170.59], ["BLK", "KGM/17.137/K", "Kazı taşı ile blokaj", "m³", 1137.64], ["NT", "07.005/K", "Ariyet ocağından getirilecek veya depoya gidecek kazının taşınması (blokaj için taş)", "m³", null], ["ND", "07.006/K", "Kazıdan başka inşaat malzemelerinin taşınması (demir)", "Ton", null], ["NB", "07.006/K", "Kazıdan başka inşaat malzemelerinin taşınması (koruge boru)", "m³", null], ["TOK", "KGM/14.018/K", "Dolguya gelmiş serilmiş her cins kazının el ile tokmaklanarak sıkıştırılması", "m³", 256.25], ["EKS", "KGM/03.504", "Ekskavatörün 1 saatlik ücreti (2 1/2 yd³ lük ve takriben 210 HP gücünde)", "Saat", 3374.35]];
+/* =====================================================================
+   SANAT YAPISI — keşif (imalat tespiti) + yaklaşık maliyet
+   Hesap motoru referans_sy.py (v4 kazı kuralı) ile aynı; keşif Excel'i gömülü şablondan.
+   ===================================================================== */
+const SY_CINS = { B: 'KORUGE BORU', M: 'KUTU MENFEZ', D: 'KAFA DUVARI' };
+const SY_CAPLAR = [40, 60, 80, 100, 120];
+const SY_MENFEZ = [...new Set(SY_TIP.map(r => r[1].toFixed(2) + '|' + r[2].toFixed(2)))].map(x => x.split('|').map(Number));
+const SY_TIPK = {}; SY_TIP.forEach(r => SY_TIPK[`${r[0]}|${r[1].toFixed(2)}|${r[2].toFixed(2)}`] = r);
+const SY_ESKI_SOZ = null;
+function xr(x, n) {   // Excel ROUND gibi (15 anlamlı basamak, yarımda yukarı)
+  if (!isFinite(x)) return 0;
+  const v = Number(Number(x).toPrecision(15)), f = 10 ** n, a = Number((Math.abs(v) * f).toPrecision(15));
+  return Math.sign(v) * Math.floor(a + 0.5) / f;
+}
+const syVar = v => v === true || ['VAR', 'V', 'EVET', 'TRUE', '1'].includes(String(v ?? '').trim().toUpperCase());
+function syYapiHesap(y, P) {
+  const tp = y.cins, Dm = (num(y.cap) || 0) / 100, Dd = Dm * P.V_BoruDisOran, L = num(y.L) || 0, H = num(y.H) || 0;
+  const hd = num(y.hd) !== null ? num(y.hd) : (tp === 'M' ? H : Dm);
+  const mb = (y.memba == null || y.memba === 'VAR') ? 1 : 0;
+  const ms = y.mansap == null ? (tp === 'M' ? 1 : 0) : (y.mansap === 'VAR' ? 1 : 0);
+  const n = mb + ms, L0 = tp === 'D' ? 0 : (num(y.boy) || 0);
+  const s = hd <= 1.5 ? 1 : (hd <= 3 ? 2 : 0);
+  let t = 0, b = 0, we = 0, bet = 0, kal_ = 0, ince = 0, kalip = 0;
+  const U = [];
+  if (tp === 'M') {
+    const r = SY_TIPK[`${s}|${L.toFixed(2)}|${H.toFixed(2)}`];
+    if (!r) U.push(s === 0 ? 'Üstteki toprak 3 m\'den fazla: menfez tip tablosu yok' : 'Menfez tipi (L×H) KGM tablosunda yok');
+    else { t = r[3] / 100; b = r[4] / 100; we = r[5] / 100; bet = r[6]; kal_ = r[8]; ince = r[9]; kalip = r[10]; }
+  }
+  if ((tp === 'B' || tp === 'D') && !SY_CAPLAR.includes(num(y.cap))) U.push('Çap seçilmedi');
+  if ((tp === 'B' || tp === 'M') && !(L0 > 0)) U.push('Boy yok');
+  if ((tp === 'B' || tp === 'D') && Dd > P.V_KafaYuk - 0.2) U.push('Boru kafa duvarına sığmıyor');
+  const Bd = L + 2 * we, Hd = H + t + b, Lk = P.V_KanatOran * Hd;
+  const kb = P.V_KanatKal * Lk * (Hd + P.V_KanatUc) / 2 + P.V_KanatTemelG * P.V_KanatTemelK * Lk;
+  const kk = 2 * Lk * (Hd + P.V_KanatUc) / 2 + P.V_KanatUc * P.V_KanatKal + 2 * P.V_KanatTemelK * Lk;
+  const kz = Lk * (P.V_KanatTemelG + 2 * P.V_CalPayM) * ((Hd + P.V_KanatUc) / 2 + P.V_KanatTemelK);
+  const A = P.V_KafaBoy * P.V_KafaYuk - Math.PI * Dd ** 2 / 4;
+  const fb = P.V_KafaKal * A, fk = 2 * A + 2 * P.V_KafaYuk * P.V_KafaKal + P.V_KafaBoy * P.V_KafaKal;
+  const fz = (P.V_KafaBoy + 2 * P.V_CalPayK) * (P.V_KafaKal + 2 * P.V_CalPayK) * P.V_KafaYuk;
+  const KD = tp === 'B' || tp === 'D', q = {};
+  q.KZG = tp === 'B' ? L0 * (Dm + P.V_KaziGenEk) * (hd + Dm) : tp === 'M' ? L0 * (L + P.V_KaziGenEk) * (hd + H) : 0;
+  q.KZK = KD ? n * fz : n * 2 * kz;
+  q.KZD = P.V_HendekBoy * P.V_HendekKesit + (syVar(y.su) ? P.V_SuCukuru : 0) + (syVar(y.heyelan) ? P.V_Heyelan : 0) + (num(y.diger) || 0);
+  SY_CAPLAR.forEach(c => q['B' + c] = tp === 'B' && num(y.cap) === c ? L0 : 0);
+  q.BLK = tp === 'B' ? L0 * P.V_BlokajGenB * P.V_BlokajKalB : tp === 'M' ? L0 * P.V_BlokajGenM * P.V_BlokajKalM : 0;
+  q.BD = KD ? n * fb : n * (2 * kb + P.V_ParafuyD * P.V_ParafuyK * Bd);
+  q.BA = tp === 'M' ? L0 * bet + n * P.V_BordurA * P.V_BordurB * Bd : 0;
+  const kdk = (2 * (Math.ceil(xr(P.V_KafaBoy / P.V_KDDusAra, 9)) + 1) * (P.V_KafaYuk - 0.1 + P.V_KDKanca) * P.V_KDDusCap ** 2 / 162
+    + 2 * (Math.ceil(xr(P.V_KafaYuk / P.V_KDYatAra, 9)) + 1) * (P.V_KafaBoy - 0.1) * P.V_KDYatCap ** 2 / 162
+    + P.V_KDTakAdet * (Dd + 0.8) * 144 / 162);
+  q.DI = tp === 'M' ? (L0 * ince + n * Bd * P.V_BordurDemir) / 1000 : n * kdk / 1000;
+  q.DK = tp === 'M' ? L0 * kal_ / 1000 : 0;
+  q.KAL = KD ? n * fk : 0;     // menfez kalıbı beton pozunun analizinde — ayrıca ödenmez
+  q.ISK = tp === 'M' ? L * H * L0 : 0;
+  q.KAT = tp === 'M' ? L0 * (2 * Hd + Bd) : 0;
+  q.TUV = tp === 'B' ? L0 * ((Dm + P.V_TuvGen) * (Dm + P.V_TuvYuk) - Math.PI * Dm ** 2 / 4) : 0;
+  q.TOK = tp === 'B' ? L0 * P.V_TokmakB : tp === 'M' ? L0 * 2 * P.V_CalPayM * Hd : 0;
+  q.NB = tp === 'B' ? L0 * Math.PI * Dd ** 2 / 4 : 0;
+  Object.keys(q).forEach(k => q[k] = xr(q[k], 3));
+  q.GRO = xr(q.BLK * P.V_GroOran, 3);
+  q.KZ = q.KZG + q.KZK + q.KZD;
+  return { q, U, hd, n };
+}
+function syAF(v, P) { const [M, b, c, d, e, f] = (v || []).map(x => num(x) || 0); return xr(1 + 0.25 / M * (b + d + 2 * (c + e) + 3 * f) + P.V_Ii + P.V_Nn, 2); }
+function syF(v, Y, P) {
+  const M = num((v || [])[0]) || 0; if (!M) return null;
+  const a = syAF(v, P);
+  return xr(M > 10 ? 1.25 * P.V_K * (0.0007 * M + 0.01) * Y * a : 1.25 * 0.00017 * P.V_K * Math.sqrt(M * 1000) * Y * a, 2);
+}
+function syBF(is) { const b = {}; SY_KALEM.forEach(([k, , , , bf]) => b[k] = is.bf && k in is.bf ? is.bf[k] : bf); return b; }
+function syHesap(is) {
+  const P = { ...SY_PARAM, ...(is.param || {}) }, bfd = syBF(is);
+  const rows = is.yapilar.map(y => ({ y, ...syYapiHesap(y, P) }));
+  const yollar = {}, U = [];
+  is.yapilar.forEach((y, i) => { if (!is.yollar.some(x => x.kod === y.yol)) U.push(`${i + 1}. imalat: yol ${y.yol || '—'} tanımlı değil`); });
+  rows.forEach((r, i) => r.U.forEach(u => U.push(`${i + 1}. imalat (${r.y.yol} ${kmF(num(r.y.km))}): ${u}`)));
+  for (const yl of is.yollar) {
+    const tot = {};
+    rows.filter(r => r.y.yol === yl.kod).forEach(r => Object.entries(r.q).forEach(([k, v]) => tot[k] = (tot[k] || 0) + v));
+    const yb = {};
+    for (const [k] of SY_KALEM) {
+      let m, bf;
+      if (k === 'ND') { m = (tot.DI || 0) + (tot.DK || 0); bf = syF(yl.demir, 1, P); }
+      else if (k === 'NT') { m = tot.BLK || 0; bf = syF(yl.tas, P.V_YTas, P); }
+      else if (k === 'NB') { m = tot.NB || 0; bf = syF(yl.boru, P.V_YBoru, P); }
+      else if (k === 'EKS') { m = num(yl.eks) || 0; bf = bfd[k]; }
+      else { m = tot[k] || 0; bf = bfd[k]; }
+      m = xr(m, 3);
+      yb[k] = [m, bf, (m === 0 || bf === null || bf === undefined) ? 0 : xr(m * bf, 2)];
+      if (m > 0 && (bf === null || bf === undefined)) U.push(`Yol ${yl.kod}: ${SY_KALEM.find(x => x[0] === k)[1]} birim fiyatı yok${['NT', 'ND', 'NB'].includes(k) ? ' (nakliye mesafesi girilmedi)' : ''}`);
+    }
+    yb._top = xr(Object.values(yb).reduce((a, v) => a + v[2], 0), 2);
+    yb._kazi = tot.KZ || 0;
+    yollar[yl.kod] = yb;
+  }
+  const toplam = xr(Object.values(yollar).reduce((a, yb) => a + Object.entries(yb).filter(([k]) => !k.startsWith('_')).reduce((s, [, v]) => s + v[2], 0), 0), 2);
+  return { rows, yollar, toplam, U, P };
+}
+
+/* ---- kayıt ---- */
+const syAktif = () => S.syIsler.find(x => x.id === S.syAktifId) || null;
+function syYeniIs() {
+  return { id: uid(), tur: 'sy', ad: '', bolge: '', isletme: '', ymTarih: trTarih(), k1Ad: '', k1Unvan: '', k2Ad: '', k2Unvan: '', k3Ad: '', k3Unvan: '', onayAd: '', onayUnvan: '',
+    yollar: [], yapilar: [], bf: (() => { try { return JSON.parse(localStorage.getItem('yys_sybf') || '{}'); } catch (e) { return {}; } })(), olusturma: new Date().toISOString() };
+}
+function sySirala(is) {
+  const yi = k => { const i = is.yollar.findIndex(y => y.kod === k); return i < 0 ? 999 : i; };
+  is.yapilar.sort((a, b) => yi(a.yol) - yi(b.yol) || (num(a.km) || 0) - (num(b.km) || 0));
+}
+function syOlcu(y) { return y.cins === 'M' ? `${fmt(y.L)}×${fmt(y.H)}` : `Ø${y.cap ?? '?'}`; }
+function syEtiket(y) {
+  return `${{ B: 'Koruge', M: 'Menfez', D: 'Kafa duvarı' }[y.cins] || '?'} ${syOlcu(y)}${y.cins !== 'D' && num(y.boy) ? ' · ' + fmt(y.boy) + ' m' : ''}`;
+}
+
+/* ---- fotoğraflar (IndexedDB 'foto') ---- */
+const Foto = {
+  async yaz(blob) { const id = 'F' + uid(); if (Depo.db && Depo.db.objectStoreNames.contains('foto')) await Depo.p(Depo.st('foto', 'readwrite').put({ id, blob })); else (Foto.mem ||= {})[id] = blob; return id; },
+  async al(id) { if (Depo.db && Depo.db.objectStoreNames.contains('foto')) { const r = await Depo.p(Depo.st('foto').get(id)); return r && r.blob; } return (Foto.mem || {})[id]; },
+  async sil(id) { if (Depo.db && Depo.db.objectStoreNames.contains('foto')) await Depo.p(Depo.st('foto', 'readwrite').delete(id)); else delete (Foto.mem || {})[id]; },
+  async kucult(file) {
+    try {
+      const bmp = await createImageBitmap(file); const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+      return await new Promise(r => c.toBlob(r, 'image/jpeg', 0.8)) || file;
+    } catch (e) { return file; }
+  }
+};
+
+/* ---- ekranlar ---- */
+function syIsler(m) {
+  const L = [...S.syIsler].sort((a, b) => (b.guncelleme || '').localeCompare(a.guncelleme || ''));
+  m.innerHTML = `${modSec()}
+    <button class="btn p big" data-act="syYeni">+ Yeni sanat yapısı işi (keşif)</button>
+    <div style="height:10px"></div>
+    ${L.length ? L.map(is => { const h = syHesap(is); return `
+      <div class="card" data-act="syAc" data-id="${is.id}" style="cursor:pointer;${is.id === S.syAktifId ? 'border-color:var(--g2);box-shadow:0 0 0 2px var(--g3)' : ''}">
+        <div class="row" style="align-items:flex-start"><div style="flex:1">
+          <div style="font-weight:700;font-size:16px">${esc(is.ad || syIsAdi(is))}</div>
+          <div class="mut">${is.yollar.map(y => esc(y.kod)).join(', ') || 'yol yok'} · ${is.yapilar.length} imalat · YM <b>${fmt(h.toplam)} TL</b></div>
+        </div><button class="btn" style="flex:none;min-height:40px;padding:8px 12px" data-act="syMenu" data-id="${is.id}">⋯</button></div></div>`; }).join('')
+      : '<div class="empty">Sanat yapısı işi yok. Yeni bir keşif başlatın.</div>'}`;
+}
+function syIsAdi(is) { return `${is.isletme || '…'} Orman İşletme Müdürlüğü ${is.yollar.map(y => y.kod).join(', ') || '…'} kod nolu yollarda SANAT YAPISI YAPIM İŞİ`; }
+function modSec() {
+  return `<div class="seg" style="margin-bottom:12px"><button data-mod="yy" class="${S.mod !== 'sy' ? 'on' : ''}">Yeni Yol</button><button data-mod="sy" class="${S.mod === 'sy' ? 'on' : ''}">Sanat Yapısı</button></div>`;
+}
+function syIsForm(is) {
+  const yeni = !is; is = is ? JSON.parse(JSON.stringify(is)) : syYeniIs();
+  const f = (k, l, z, tip) => `<label class="f">${l}${z ? ' <b style="color:var(--err)">*</b>' : ''}</label>${tip === 'tarih' ? `<input class="i" type="date" data-k="${k}" value="${trToIso(is[k])}">` : `<input class="i" data-k="${k}" value="${esc(is[k] || '')}" autocomplete="off">`}`;
+  const sh = sayfa(yeni ? 'Yeni sanat yapısı işi' : 'İş bilgileri', `
+    <div class="sec">${f('bolge', 'Orman Bölge Müdürlüğü', 1)}${f('isletme', 'Orman İşletme Müdürlüğü', 1)}
+      ${yeni ? `<div class="row"><div><label class="f">İlk yol kod no <b style="color:var(--err)">*</b></label><input class="i" id="iyKod" autocomplete="off"></div><div><label class="f">Şeflik</label><input class="i" id="iySef" autocomplete="off"></div></div>
+      <div class="mut" style="margin-top:6px">Başka yollar sonra “Yollar ve fiyatlar” ekranından eklenir.</div>` : ''}
+      ${f('ad', 'İşin adı (boş = otomatik)')}${f('ymTarih', 'Yaklaşık maliyet tarihi', 0, 'tarih')}</div>
+    <details class="t" ${yeni ? '' : 'open'}><summary>Yaklaşık maliyet komisyonu ve onay</summary>
+      ${f('k1Ad', 'Başkan — adı soyadı')}${f('k1Unvan', 'Başkan — unvanı')}${f('k2Ad', 'Üye — adı soyadı')}${f('k2Unvan', 'Üye — unvanı')}
+      ${f('k3Ad', 'Üye — adı soyadı')}${f('k3Unvan', 'Üye — unvanı')}${f('onayAd', 'Onaylayan (İşletme Müdürü)')}${f('onayUnvan', 'Onaylayan — unvanı (boş = İşletme Müdürü)')}
+      <div style="height:12px"></div></details>`, `<button class="btn p big" id="iKay">Kaydet</button>`);
+  $('#iKay', sh).onclick = async () => {
+    sh.querySelectorAll('[data-k]').forEach(el => is[el.dataset.k] = el.type === 'date' ? (el.value ? isoToTr(el.value) : '') : el.value.trim());
+    if (!is.bolge || !is.isletme) return toast('Bölge ve işletme gerekli');
+    if (yeni) {
+      const kod = $('#iyKod', sh).value.trim(); if (!kod) return toast('Yol kod no girin');
+      is.yollar.push(syYolYeni(kod, $('#iySef', sh).value.trim()));
+      S.syIsler.push(is);
+    } else Object.assign(S.syIsler.find(x => x.id === is.id), is);
+    await kaydet(S.syIsler.find(x => x.id === is.id), yeni ? 'oluşturuldu' : 'iş bilgileri');
+    S.syAktifId = is.id; sh.kapat(); git(yeni ? 'saha' : S.ekran);
+  };
+}
+function syYolYeni(kod, seflik) { return { kod, seflik: seflik || '', ad: '', program: null, eks: null, tas: [null, null, null, null, null, null], demir: [null, null, null, null, null, null], boru: [null, null, null, null, null, null] }; }
+function syMenu(is) {
+  const sh = sayfa(esc(is.ad || is.yollar.map(y => y.kod).join(', ')), `<div class="sec" style="display:grid;gap:8px">
+    <button class="btn" data-m="duz">İş bilgilerini düzenle</button><button class="btn" data-m="kop">Kopyasını oluştur</button>
+    <button class="btn d" data-m="sil">İşi sil</button></div>`, '');
+  sh.addEventListener('click', async e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    if (b.dataset.m === 'duz') { sh.kapat(); syIsForm(is); }
+    if (b.dataset.m === 'kop') { const c = JSON.parse(JSON.stringify(is)); c.id = uid(); c.ad = (is.ad || '') + ' (kopya)'; c.yapilar.forEach(y => y.foto = []); S.syIsler.push(c); await kaydet(c, 'kopya'); sh.kapat(); render(); }
+    if (b.dataset.m === 'sil') {
+      if (!await onay(`Bu iş (${is.yapilar.length} imalat) silinsin mi? Otomatik yedeklerden geri alınabilir (fotoğraflar hariç).`, 'Sil', true)) return;
+      await Depo.yedekle(is, 'silinmeden önce'); await Depo.sil(is.id);
+      for (const y of is.yapilar) for (const f of y.foto || []) await Foto.sil(f);
+      S.syIsler = S.syIsler.filter(x => x.id !== is.id); if (S.syAktifId === is.id) S.syAktifId = null; sh.kapat(); render();
+    }
+  });
+}
+function sySaha(m) {
+  const is = syAktif(); if (!is) return git('yollar');
+  const h = syHesap(is);
+  m.innerHTML = `<div id="map" style="height:34vh;min-height:200px"></div>
+    <div class="mapbtns"><button class="btn p" data-act="syImalat">+ İmalat</button><button class="btn" data-act="syKopya" ${is.yapilar.length ? '' : 'disabled'}>⧉ Öncekini kopyala</button></div>
+    <div class="msg o" style="margin:0 0 10px">Yaklaşık maliyet: <b>${fmt(h.toplam)} TL</b> · ${is.yapilar.length} imalat</div>
+    ${is.yollar.map(yl => { const L = is.yapilar.map((y, i) => [y, i]).filter(([y]) => y.yol === yl.kod); return `
+      <div class="card" style="padding:4px 10px"><div class="row" style="padding:8px 0 4px"><b style="flex:1">Yol ${esc(yl.kod)}${yl.seflik ? ' · ' + esc(yl.seflik) : ''}</b><span class="mut">${L.length} imalat · ${fmt(h.yollar[yl.kod]?._top)} TL</span></div>
+      ${L.length ? `<ul class="lst">${L.map(([y, i]) => `<li data-act="syYapi" data-i="${i}"><span class="no" style="${y.cins === 'M' ? 'background:#1565c0' : y.cins === 'D' ? 'background:#8e24aa' : ''}">${i + 1}</span>
+        <span class="km">${kmF(num(y.km))}</span><span class="z"><b>${esc(syEtiket(y))}</b><br>${y.cins === 'M' ? 'kanat' : 'kafa'}: ${y.memba !== 'YOK' ? 'giriş' : ''}${y.memba !== 'YOK' && y.mansap === 'VAR' ? '+' : ''}${y.mansap === 'VAR' ? 'çıkış' : ''}${y.memba === 'YOK' && y.mansap !== 'VAR' ? 'yok' : ''}${syVar(y.su) ? ' · su çukuru' : ''}${syVar(y.heyelan) ? ' · heyelan' : ''}${(y.foto || []).length ? ' · 📷' + y.foto.length : ''}</span>
+        ${h.rows[i].U.length ? '<span class="tag e">!</span>' : y.lat == null ? '<span class="tag">⌖</span>' : ''}</li>`).join('')}</ul>` : '<div class="empty" style="padding:12px">Bu yolda imalat yok.</div>'}</div>`; }).join('')}`;
+  syHaritaKur(is);
+}
+function syHaritaKur(is) {
+  const el = $('#map'); if (!el) return;
+  if (typeof L === 'undefined') { el.innerHTML = '<div class="empty">Harita yüklenemedi (internet yok). İmalat listesi aşağıda.</div>'; return; }
+  try {
+    if (S.map) { S.map.remove(); S.map = null; }
+    const map = L.map(el); S.map = map; HL = {};
+    try { L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map); } catch (e) { }
+    const pts = [];
+    is.yapilar.forEach((y, i) => {
+      if (y.lat == null || y.lon == null) return;
+      pts.push([y.lat, y.lon]);
+      L.marker([y.lat, y.lon], { icon: L.divIcon({ className: '', html: `<div class="mk ${y.cins === 'M' ? 'D' : y.cins === 'D' ? 'KP' : ''}">${i + 1}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(map).on('click', () => syYapiAc(i));
+    });
+    if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.15), { maxZoom: 16 }); else if (S.konum) map.setView([S.konum.lat, S.konum.lon], 15); else map.setView([40.75, 30.4], 8);
+    haritaBen(); setTimeout(() => map.invalidateSize(), 60);
+  } catch (e) { console.warn(e); }
+}
+function syYapiAc(i, kopyala) {
+  const is = syAktif(); if (!is) return;
+  const yeni = i === undefined || i === null;
+  const son = is.yapilar[is.yapilar.length - 1];
+  let y = yeni ? (kopyala && son ? { ...JSON.parse(JSON.stringify(son)), km: null, lat: null, lon: null, foto: [], not: '' }
+    : { yol: (son && son.yol) || is.yollar[0]?.kod || '', km: null, cins: 'B', cap: 80, L: null, H: null, boy: null, hd: null, memba: 'VAR', mansap: 'YOK', sekil: 'DİK', su: false, heyelan: false, diger: null, lat: null, lon: null, not: '', foto: [] })
+    : JSON.parse(JSON.stringify(is.yapilar[i]));
+  y.foto ||= [];
+  const yeniFoto = [];
+  const sh = sayfa(yeni ? 'Yeni imalat' : `İmalat ${i + 1}`, `
+    <div class="sec"><div class="lbl">Yol ve yeri</div>
+      <div class="grid4" id="yYol">${is.yollar.map(yl => `<button class="chip" data-v="${esc(yl.kod)}">${esc(yl.kod)}</button>`).join('')}</div>
+      <label class="f">Km (m)</label><input class="i huge" id="yKm" inputmode="decimal" autocomplete="off" value="${y.km ?? ''}" placeholder="ör. 1250">
+    </div>
+    <div class="sec"><div class="lbl">Cinsi</div>
+      <div class="grid4" style="grid-template-columns:repeat(3,1fr)" id="yCins"><button class="chip" data-v="B">Koruge boru</button><button class="chip" data-v="M">Kutu menfez</button><button class="chip" data-v="D">Kafa duvarı<br><span style="font-weight:400;font-size:11px">mevcut boruya</span></button></div>
+      <div id="yCapK"><label class="f">Boru çapı</label><div class="grid5" id="yCap">${SY_CAPLAR.map(c => `<button class="chip" data-v="${c}">Ø${c}</button>`).join('')}</div></div>
+      <div id="yMenK"><label class="f">Menfez açıklığı L × yüksekliği H (m) — KGM standart tipleri</label><div class="grid4" id="yMen">${SY_MENFEZ.map(([l, h]) => `<button class="chip" data-v="${l}|${h}">${fmt(l)}×${fmt(h)}</button>`).join('')}</div></div>
+      <div id="yBoyK"><label class="f">Boy (m)</label><input class="i huge" id="yBoy" inputmode="decimal" value="${y.boy ?? ''}" autocomplete="off"></div>
+    </div>
+    <div class="sec"><div class="lbl" id="yAgizL">Giriş / çıkış</div>
+      <div class="row"><div><label class="f" style="margin-top:0">Giriş (memba)</label><div class="seg" id="yMb"><button data-v="VAR">Var</button><button data-v="YOK">Yok</button></div></div>
+      <div><label class="f" style="margin-top:0">Çıkış (mansap)</label><div class="seg" id="yMs"><button data-v="VAR">Var</button><button data-v="YOK">Yok</button></div></div></div>
+      <div class="row"><div><label class="f">Üstteki toprak (m)</label><input class="i" id="yHd" inputmode="decimal" value="${y.hd ?? ''}" placeholder="boş = açıklık kadar"></div>
+      <div><label class="f">Şekli</label><div class="seg" id="ySek"><button data-v="DİK">Dik</button><button data-v="VEREV">Verev</button></div></div></div>
+    </div>
+    <div class="sec"><div class="lbl">Diğer kazı</div>
+      <div class="mut" style="margin-bottom:8px">60 m hendek kazısı (10,8 m³) her imalata otomatik verilir.</div>
+      <div class="btns"><button class="chip" id="ySu">Su toplama çukuru<br><span style="font-weight:400;font-size:12px">+1 m³</span></button><button class="chip" id="yHey">Heyelan kazısı<br><span style="font-weight:400;font-size:12px">+10 m³</span></button></div>
+      <label class="f">Başka kazı (m³, isteğe bağlı)</label><input class="i" id="yDig" inputmode="decimal" value="${y.diger ?? ''}">
+    </div>
+    <div class="sec"><div class="lbl">Konum ve fotoğraf (isteğe bağlı)</div>
+      <div class="gps"><span style="flex:1" id="yGps"></span><button class="btn" style="min-height:40px;padding:6px 12px" id="yGpsAl">📍 Konumu al</button></div>
+      <div class="row"><div><label class="f">Enlem</label><input class="i" id="yLat" inputmode="decimal" value="${y.lat ?? ''}"></div><div><label class="f">Boylam</label><input class="i" id="yLon" inputmode="decimal" value="${y.lon ?? ''}"></div></div>
+      <div id="yFotos" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+      <label class="btn" style="display:block;text-align:center;margin-top:8px;line-height:24px">📷 Fotoğraf ekle<input type="file" accept="image/*" capture="environment" id="yFotoIn" hidden multiple></label>
+      <label class="f">Not</label><textarea class="i" id="yNot" rows="2">${esc(y.not || '')}</textarea>
+    </div>
+    <div class="sec" id="yOn"></div>
+    <div id="yMsg"></div>
+    ${yeni ? '' : '<button class="btn d" style="width:100%" id="ySil">İmalatı sil</button>'}`,
+    `<button class="btn" id="yKay">Kaydet</button><button class="btn p" id="yKayY" style="flex:1.4">Kaydet + yeni</button>`);
+  const $$ = s => $(s, sh);
+  const secim = (id, v) => sh.querySelectorAll(`#${id} [data-v]`).forEach(b => b.classList.toggle('on', b.dataset.v === String(v)));
+  function ciz() {
+    secim('yYol', y.yol); secim('yCins', y.cins); secim('yCap', y.cap); secim('yMen', `${y.L}|${y.H}`); secim('yMb', y.memba || 'VAR'); secim('yMs', y.mansap || (y.cins === 'M' ? 'VAR' : 'YOK')); secim('ySek', y.sekil || 'DİK');
+    $$('#yCapK').style.display = y.cins === 'M' ? 'none' : ''; $$('#yMenK').style.display = y.cins === 'M' ? '' : 'none'; $$('#yBoyK').style.display = y.cins === 'D' ? 'none' : '';
+    $$('#yAgizL').textContent = y.cins === 'M' ? 'Giriş / çıkış (bordür + 2 kanat + parafuy)' : 'Giriş / çıkış kafa duvarı';
+    $$('#ySu').classList.toggle('on', syVar(y.su)); $$('#yHey').classList.toggle('on', syVar(y.heyelan));
+    $$('#yGps').textContent = y.lat != null ? `${(+y.lat).toFixed(6)}, ${(+y.lon).toFixed(6)}` : 'Koordinat yok';
+    onizle();
+  }
+  function oku() {
+    y.km = num($$('#yKm').value); y.boy = num($$('#yBoy').value); y.hd = num($$('#yHd').value); y.diger = num($$('#yDig').value);
+    y.lat = num($$('#yLat').value); y.lon = num($$('#yLon').value); y.not = $$('#yNot').value.trim();
+    if (y.cins === 'D') y.boy = null;
+  }
+  function onizle() {
+    oku();
+    const r = syYapiHesap(y, { ...SY_PARAM, ...(is.param || {}) }), q = r.q, bf = syBF(is);
+    const tut = Object.entries(q).filter(([k]) => bf[k] != null && SY_KALEM.some(x => x[0] === k)).reduce((a, [k, v]) => a + xr(v * bf[k], 2), 0);
+    $$('#yOn').innerHTML = `<div class="lbl">Bu imalatın metrajı</div><div class="kv">
+      <span>Kazı</span><b>${fmt(q.KZ, 2)} m³ <span class="mut">(gövde ${fmt(q.KZG)} + kafa/kanat ${fmt(q.KZK)} + diğer ${fmt(q.KZD)})</span></b>
+      ${q.BD ? `<span>Demirsiz beton</span><b>${fmt(q.BD, 3)} m³</b>` : ''}${q.BA ? `<span>Demirli beton</span><b>${fmt(q.BA, 3)} m³</b>` : ''}
+      ${q.DI + q.DK ? `<span>Demir</span><b>${fmt((q.DI + q.DK) * 1000, 0)} kg</b>` : ''}${q.KAL ? `<span>Kalıp (kafa)</span><b>${fmt(q.KAL)} m²</b>` : ''}
+      <span>Tutar (nakliye hariç)</span><b>≈ ${fmt(tut)} TL</b></div>
+      ${r.U.map(u => `<div class="msg e">${esc(u)}</div>`).join('')}`;
+  }
+  sh.addEventListener('click', e => {
+    const b = e.target.closest('[data-v]'); if (!b) return;
+    const g = b.parentElement.id, v = b.dataset.v;
+    if (g === 'yYol') y.yol = v;
+    if (g === 'yCins') { if (y.cins !== v) { y.cins = v; y.memba = 'VAR'; y.mansap = v === 'M' ? 'VAR' : 'YOK'; if (v === 'M' && !y.L) { y.L = 1; y.H = 1; } if (v !== 'M' && !y.cap) y.cap = 80; } }
+    if (g === 'yCap') y.cap = +v;
+    if (g === 'yMen') { const [l, h] = v.split('|').map(Number); y.L = l; y.H = h; }
+    if (g === 'yMb') y.memba = v; if (g === 'yMs') y.mansap = v; if (g === 'ySek') y.sekil = v;
+    ciz();
+  });
+  $$('#ySu').onclick = () => { y.su = !syVar(y.su); ciz(); };
+  $$('#yHey').onclick = () => { y.heyelan = !syVar(y.heyelan); ciz(); };
+  sh.addEventListener('input', e => { if (['yKm', 'yBoy', 'yHd', 'yDig'].includes(e.target.id)) onizle(); });
+  $$('#yGpsAl').onclick = async () => { $$('#yGps').textContent = 'Konum alınıyor…'; const c = await konumAl(true); if (c) { $$('#yLat').value = r6(c.lat); $$('#yLon').value = r6(c.lon); oku(); toast(`Konum alındı ±${Math.round(c.acc)} m`); } else toast('Konum alınamadı'); ciz(); };
+  async function fotoCiz() {
+    const kut = $$('#yFotos'); kut.innerHTML = '';
+    for (const id of y.foto) {
+      const bl = await Foto.al(id); if (!bl) continue;
+      const u = URL.createObjectURL(bl), d = document.createElement('div');
+      d.style.cssText = 'position:relative'; d.innerHTML = `<img src="${u}" style="width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--line)"><button data-fs="${id}" style="position:absolute;top:-6px;right:-6px;border:0;border-radius:50%;width:26px;height:26px;background:var(--err);color:#fff;font-weight:700">×</button>`;
+      kut.appendChild(d);
+    }
+  }
+  sh.addEventListener('click', async e => { const b = e.target.closest('[data-fs]'); if (!b) return; y.foto = y.foto.filter(x => x !== b.dataset.fs); fotoCiz(); });
+  $$('#yFotoIn').onchange = async ev => {
+    for (const f of ev.target.files) { const id = await Foto.yaz(await Foto.kucult(f)); y.foto.push(id); yeniFoto.push(id); }
+    ev.target.value = ''; fotoCiz();
+  };
+  ciz(); fotoCiz();
+  if (yeni && !kopyala) setTimeout(() => $$('#yKm').focus(), 80);
+  async function kaydetY(devam) {
+    oku();
+    const err = t => { $$('#yMsg').innerHTML = `<div class="msg e">${t}</div>`; $$('#yMsg').scrollIntoView({ block: 'center' }); };
+    if (!y.yol) return err('Yol seçin.');
+    if (y.km === null) return err('Km girin.');
+    if (y.cins !== 'D' && !(y.boy > 0)) return err('Boy girin.');
+    if (y.cins === 'M' && !SY_TIPK[`${(y.hd ?? y.H) <= 1.5 ? 1 : 2}|${(+y.L).toFixed(2)}|${(+y.H).toFixed(2)}`]) return err('Bu menfez tipi (üstteki toprakla birlikte) KGM tablosunda yok.');
+    const eski = yeni ? null : is.yapilar[i];
+    if (eski) for (const f of eski.foto || []) if (!y.foto.includes(f)) await Foto.sil(f);
+    if (yeni) is.yapilar.push(y); else is.yapilar[i] = y;
+    sySirala(is);
+    await kaydet(is, yeni ? 'imalat eklendi' : 'imalat düzenlendi');
+    yeniFoto.length = 0; sh.kapat(); render();
+    toast(`${is.yapilar.indexOf(y) + 1}. imalat kaydedildi`);
+    if (devam) syYapiAc(null, true);
+  }
+  sh._iptal = async () => { for (const f of yeniFoto) await Foto.sil(f); };
+  $$('[data-x]').addEventListener('click', () => sh._iptal(), { once: true });
+  $$('#yKay').onclick = () => kaydetY(false);
+  $$('#yKayY').onclick = () => kaydetY(true);
+  if (!yeni) $$('#ySil').onclick = async () => {
+    if (!await onay(`${i + 1}. imalat (${esc(y.yol)} ${kmF(num(y.km))}) silinsin mi?`, 'Sil', true)) return;
+    for (const f of is.yapilar[i].foto || []) await Foto.sil(f);
+    is.yapilar.splice(i, 1); await kaydet(is, 'imalat silindi'); sh.kapat(); render();
+  };
+}
+function syAyar(m) {
+  const is = syAktif(); if (!is) return git('yollar');
+  const h = syHesap(is), bf = syBF(is);
+  m.innerHTML = `<div class="card"><h2>Yollar ve nakliye</h2>
+      ${is.yollar.map((yl, j) => `<div class="card" style="padding:10px" data-act="syYol" data-j="${j}"><div class="row"><b style="flex:1">Yol ${esc(yl.kod)}${yl.seflik ? ' · ' + esc(yl.seflik) : ''}</b><span class="mut">✎</span></div>
+        <div class="mut">Nakliye M: taş ${yl.tas?.[0] ?? '—'} · demir ${yl.demir?.[0] ?? '—'} · boru ${yl.boru?.[0] ?? '—'} km · ekskavatör ${yl.eks ?? '—'} saat</div></div>`).join('')}
+      <button class="btn" style="width:100%" data-act="syYol">+ Yol ekle</button></div>
+    <div class="card"><h2>Birim fiyatlar</h2><div class="mut" style="margin-bottom:8px">Nakliye fiyatları yol yol mesafeden hesaplanır. Değiştirdiğiniz fiyat yalnız bu işte geçerli; “Varsayılan yap” yeni işlere de uygular.</div>
+      ${SY_KALEM.filter(([k]) => !['NT', 'ND', 'NB'].includes(k)).map(([k, poz, tan, bir]) => `<div class="row" style="border-bottom:1px solid var(--line);padding:6px 0"><div style="flex:2"><b>${esc(poz)}</b><br><span class="mut">${esc(tan.length > 70 ? tan.slice(0, 70) + '…' : tan)} (${esc(bir)})</span></div>
+        <input class="i" style="flex:1;min-height:42px;font-size:15px;text-align:right" inputmode="decimal" data-bf="${k}" value="${bf[k] ?? ''}" placeholder="boş"></div>`).join('')}
+      <button class="btn" style="width:100%;margin-top:8px" data-act="syBFvars">Bu fiyatları varsayılan yap</button></div>`;
+}
+function syYolForm(j) {
+  const is = syAktif(), yeni = j === undefined;
+  const yl = yeni ? syYolYeni('', is.yollar[0]?.seflik) : JSON.parse(JSON.stringify(is.yollar[j]));
+  if (yeni && is.yollar.length) { const o = is.yollar[is.yollar.length - 1]; yl.tas = [...o.tas]; yl.demir = [...o.demir]; yl.boru = [...o.boru]; }
+  const h = syHesap(is), kazi = yeni ? 0 : (h.yollar[yl.kod]?._kazi || 0);
+  const mesafe = (key, ad) => `<div class="lbl" style="margin-top:12px">${ad}</div><div class="grid5" style="grid-template-columns:repeat(6,1fr)">${['M', 'b', 'c', 'd', 'e', 'f'].map((l, x) => `<label class="zc"><span>${l} (km)</span><input data-m="${key}" data-x="${x}" inputmode="decimal" value="${yl[key][x] ?? ''}"></label>`).join('')}</div>`;
+  const sh = sayfa(yeni ? 'Yol ekle' : `Yol ${esc(yl.kod)}`, `<div class="sec">
+      <div class="row"><div><label class="f">Yol kod no</label><input class="i" id="lKod" value="${esc(yl.kod)}"></div><div><label class="f">Şeflik</label><input class="i" id="lSef" value="${esc(yl.seflik)}"></div></div>
+      <label class="f">Yolun adı</label><input class="i" id="lAd" value="${esc(yl.ad || '')}">
+      <div class="row"><div><label class="f">Program uzunluğu (m)</label><input class="i" id="lPr" inputmode="decimal" value="${yl.program ?? ''}"></div>
+      <div><label class="f">Ekskavatör (saat, elle)</label><input class="i" id="lEk" inputmode="decimal" value="${yl.eks ?? ''}"></div></div>
+      ${kazi ? `<div class="mut" style="margin-top:6px">Öneri: bu yolun kazısı ${fmt(kazi, 1)} m³ ÷ 25 m³/saat ≈ <b>${fmt(Math.ceil(kazi / 25), 0)} saat</b> (ekskavatör verimi 25 m³/saat kabulüyle).</div>` : ''}</div>
+    <div class="sec"><div class="lbl">Nakliye mesafeleri</div><div class="mut">M: ortalama taşıma mesafesi; b: %10–15 meyilli kaplamalı, c: %15'ten fazla meyilli kaplamalı, d: %10'a kadar meyilli ham, e: %10–15 meyilli ham, f: %15'ten fazla meyilli ham yol (km).</div>
+      ${mesafe('tas', 'Taş (blokaj)')}${mesafe('demir', 'Demir')}${mesafe('boru', 'Koruge boru')}</div>
+    ${yeni ? '' : '<button class="btn d" style="width:100%" id="lSil">Yolu sil</button>'}`, `<button class="btn p big" id="lKay">Kaydet</button>`);
+  $('#lKay', sh).onclick = async () => {
+    const eskiKod = yl.kod;
+    yl.kod = $('#lKod', sh).value.trim(); yl.seflik = $('#lSef', sh).value.trim(); yl.ad = $('#lAd', sh).value.trim(); yl.program = num($('#lPr', sh).value); yl.eks = num($('#lEk', sh).value);
+    sh.querySelectorAll('[data-m]').forEach(el => yl[el.dataset.m][+el.dataset.x] = num(el.value));
+    if (!yl.kod) return toast('Yol kod no girin');
+    if (is.yollar.some((x, k) => x.kod === yl.kod && k !== j)) return toast('Bu yol zaten var');
+    if (yeni) is.yollar.push(yl); else { is.yollar[j] = yl; if (eskiKod !== yl.kod) is.yapilar.forEach(y => { if (y.yol === eskiKod) y.yol = yl.kod; }); }
+    if (is.yollar.length > 8) return toast('Bir işte en çok 8 yol olabilir');
+    await kaydet(is, 'yol'); sh.kapat(); render();
+  };
+  if (!yeni) $('#lSil', sh).onclick = async () => {
+    const n = is.yapilar.filter(y => y.yol === yl.kod).length;
+    if (n) return toast(`Bu yolda ${n} imalat var; önce onları silin ya da başka yola taşıyın`);
+    if (!await onay(`Yol ${esc(yl.kod)} silinsin mi?`, 'Sil', true)) return;
+    is.yollar.splice(j, 1); await kaydet(is, 'yol silindi'); sh.kapat(); render();
+  };
+}
+function syOzet(m) {
+  const is = syAktif(); if (!is) return git('yollar');
+  const h = syHesap(is);
+  const ic = SY_KALEM.map(([k, poz, tan, bir]) => { const mm = is.yollar.reduce((a, yl) => a + (h.yollar[yl.kod]?.[k]?.[0] || 0), 0), t = is.yollar.reduce((a, yl) => a + (h.yollar[yl.kod]?.[k]?.[2] || 0), 0); return { k, poz, tan, bir, m: xr(mm, 3), t: xr(t, 2) }; }).filter(x => x.m > 0);
+  const tip = { B: 0, M: 0, D: 0 }; is.yapilar.forEach(y => tip[y.cins]++);
+  const fotoN = is.yapilar.reduce((a, y) => a + (y.foto || []).length, 0);
+  m.innerHTML = `<div class="card"><h2>${esc(is.ad || syIsAdi(is))}</h2><div class="kv">
+      <span>İmalat</span><b>${is.yapilar.length} (${tip.B} koruge, ${tip.M} menfez, ${tip.D} kafa duvarı)</b>
+      ${is.yollar.map(yl => `<span>Yol ${esc(yl.kod)}</span><b>${fmt(h.yollar[yl.kod]?._top)} TL</b>`).join('')}
+      <span>Yaklaşık maliyet</span><b style="font-size:18px">${fmt(h.toplam)} TL</b></div></div>
+    <div class="card"><h2>Kontroller</h2>${h.U.length ? h.U.map(u => `<div class="msg e">${esc(u)}</div>`).join('') : '<div class="msg o">Tüm kontroller tamam.</div>'}
+      ${is.yapilar.some(y => y.lat == null) ? `<div class="msg w">${is.yapilar.filter(y => y.lat == null).length} imalatta koordinat yok (zorunlu değil).</div>` : ''}</div>
+    <div class="card"><h2>YM icmali ve pursantaj</h2><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <tr style="background:var(--g3)"><th style="text-align:left;padding:4px">Poz</th><th style="text-align:right">Miktar</th><th style="text-align:right">Tutar (TL)</th><th style="text-align:right">%</th></tr>
+      ${ic.map(x => `<tr style="border-top:1px solid var(--line)"><td style="padding:4px"><b>${esc(x.poz)}</b><br><span class="mut" style="font-size:11px">${esc(x.tan.slice(0, 60))}</span></td><td style="text-align:right">${fmt(x.m, 3)} ${esc(x.bir)}</td><td style="text-align:right">${fmt(x.t)}</td><td style="text-align:right">${h.toplam ? fmt(x.t / h.toplam * 100, 2) : ''}</td></tr>`).join('')}
+      <tr style="border-top:2px solid var(--g);font-weight:700"><td style="padding:4px">TOPLAM (KDV hariç)</td><td></td><td style="text-align:right">${fmt(h.toplam)}</td><td style="text-align:right">100</td></tr></table></div></div>
+    <div class="card"><h2>Dışa aktar</h2><div class="btns">
+      <button class="btn p" data-act="syXls">Keşif Excel indir</button><button class="btn a" data-act="syXlsPay" ${ARTIFACT ? 'disabled' : ''}>Keşif paylaş<br><span style="font-weight:400;font-size:12px">WhatsApp vb.</span></button>
+      <button class="btn" data-act="syKml">Konumlar (KML)</button><button class="btn" data-act="syFoto" ${fotoN ? '' : 'disabled'}>Fotoğraflar (${fotoN})<br><span style="font-weight:400;font-size:12px">zip, ayrı paylaşım</span></button></div>
+      <div class="mut" style="margin-top:8px">Keşif dosyası: tespit tutanağı, mahal listesi + kroki, metraj, yol yol yaklaşık maliyet, icmal ve pursantaj. Tutarlar Excel'de açılınca hesaplanır; ekrandaki tutar aynı hesaptır.</div></div>`;
+}
+
+/* ---- keşif Excel'i ---- */
+async function sySablon() {
+  if (!window.SABLON_SY_KESIF_B64) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'sablon_sy.js'; s.onload = res; s.onerror = () => rej(new Error('Keşif şablonu (sablon_sy.js) yüklenemedi')); document.head.appendChild(s); });
+  const b = atob(window.SABLON_SY_KESIF_B64), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u;
+}
+async function syKesifUret(is) {
+  if (!is.yapilar.length) throw new Error('İmalat yok');
+  if (is.yapilar.length > 150) throw new Error('Şablon en çok 150 imalat alır');
+  const kb = await Kitap.ac(await sySablon());
+  const v = (nm, x) => { if (x !== null && x !== undefined && x !== '') kb.yazAd(nm, x); };
+  v('V_Bolge', is.bolge); v('V_Isletme', is.isletme); v('V_IsAdiElle', is.ad || null); v('V_YMTarih', trSeri(is.ymTarih));
+  for (const i of [1, 2, 3]) { v(`V_K${i}Ad`, is[`k${i}Ad`]); v(`V_K${i}Unvan`, is[`k${i}Unvan`]); }
+  v('V_OnayAd', is.onayAd); v('V_OnayUnvan', is.onayUnvan || null); v('V_TespitTarihi', trSeri(is.ymTarih));
+  is.yollar.forEach((yl, k) => {
+    const r = 7 + k, w = (c, x) => kb.yaz('YOLLAR', c + r, x ?? null);
+    w('B', String(yl.kod)); w('C', yl.seflik || null); w('D', yl.ad || null); w('E', num(yl.program)); w('F', num(yl.eks));
+    [['tas', 7], ['demir', 13], ['boru', 19]].forEach(([key, c0]) => (yl[key] || []).forEach((x, j) => w(kolAd(c0 + j), num(x))));
+  });
+  is.yapilar.forEach((y, i) => {
+    const r = 10 + i, w = (c, x) => kb.yaz('TESPİT TUTANAĞI', c + r, x === undefined ? null : x);
+    w('B', String(y.yol)); w('C', num(y.km)); w('D', SY_CINS[y.cins]); w('E', y.cins === 'M' ? null : num(y.cap));
+    w('F', y.cins === 'M' ? num(y.L) : null); w('G', y.cins === 'M' ? num(y.H) : null); w('H', y.cins === 'D' ? null : num(y.boy)); w('I', num(y.hd));
+    w('J', y.memba || null); w('K', y.mansap || null); w('L', y.sekil || null); w('N', num(y.diger));
+    w('O', num(y.lat)); w('P', num(y.lon)); w('Q', y.not || null); w('S', syVar(y.su) ? 'VAR' : 'YOK'); w('T', syVar(y.heyelan) ? 'VAR' : 'YOK');
+  });
+  const bf = syBF(is);
+  SY_KALEM.forEach(([k], i) => { if (!['NT', 'ND', 'NB'].includes(k) && is.bf && k in is.bf) kb.yaz('POZLAR', 'E' + (5 + i), bf[k] ?? null); });
+  const blob = await kb.kaydet();
+  const ad = `${is.yollar.map(y => String(y.kod).replace(/[\\/:*?"<>|\s]+/g, '_')).join('-')}_${trUp(is.isletme).replace(/\s+/g, '')}_SANATYAPISI_KEŞİF.xlsx`;
+  return { blob, ad };
+}
+function syKml(is) {
+  const nk = is.yapilar.map((y, i) => y.lat == null ? '' : `<Placemark><name>${i + 1} · ${xEsc(y.yol)} ${kmF(num(y.km))}</name><description>${xEsc(syEtiket(y))}${y.not ? ' — ' + xEsc(y.not) : ''}</description><Point><coordinates>${y.lon},${y.lat},0</coordinates></Point></Placemark>`).join('');
+  return `<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>${xEsc(is.ad || syIsAdi(is))}</name>${nk}</Document></kml>`;
+}
+async function syFotoZip(is) {
+  const L = [], te = new TextEncoder();
+  for (const [i, y] of is.yapilar.entries()) for (const [j, id] of (y.foto || []).entries()) {
+    const b = await Foto.al(id); if (!b) continue;
+    const u8 = new Uint8Array(await b.arrayBuffer());
+    L.push({ ad: `${String(i + 1).padStart(2, '0')}_${String(y.yol).replace(/[\\/:*?"<>|\s]+/g, '_')}_km${num(y.km) ?? ''}_${syOlcu(y).replace(/[×Ø]/g, m => m === '×' ? 'x' : 'D')}${y.foto.length > 1 ? '_' + (j + 1) : ''}.jpg`,
+      yontem: 0, ham: u8, crc: ZipX.crc(u8), cs: u8.length, us: u8.length });
+  }
+  if (!L.length) throw new Error('Fotoğraf yok');
+  return ZipX.yaz(L).then(b => new Blob([b], { type: 'application/zip' }));
+}
+async function syCikti(tur) {
+  const is = syAktif(); if (!is) return;
+  const kod = is.yollar.map(y => y.kod).join('-');
+  try {
+    if (tur === 'syXls' || tur === 'syXlsPay') {
+      toast('Keşif hazırlanıyor…', 3000);
+      const r = await syKesifUret(is);
+      return tur === 'syXls' ? indir(r.blob, r.ad) : paylas(r.blob, r.ad, `${is.ad || syIsAdi(is)} — keşif`);
+    }
+    if (tur === 'syKml') { if (!is.yapilar.some(y => y.lat != null)) return toast('Koordinatlı imalat yok'); return paylasVeyaIndir(new Blob([syKml(is)], { type: 'application/vnd.google-earth.kml+xml' }), `${kod}_SANATYAPISI_KONUM.kml`); }
+    if (tur === 'syFoto') return paylasVeyaIndir(await syFotoZip(is), `${kod}_SANATYAPISI_FOTOGRAFLAR.zip`);
+  } catch (e) { console.error(e); toast('Hazırlanamadı: ' + e.message, 5000); }
+}
+function paylasVeyaIndir(blob, ad) { return (!ARTIFACT && navigator.canShare) ? paylas(blob, ad, ad) : indir(blob, ad); }
+
+/* ---------------------------------------------------------- tam ekran sayfa */
+function sayfa(baslik, govde, alt) {
+  const d = document.createElement('div'); d.className = 'sheet';
+  d.innerHTML = `<div class="sh"><button data-x>‹ Geri</button><h3>${baslik}</h3></div><div class="sb">${govde}</div>${alt ? `<div class="sf">${alt}</div>` : ''}`;
+  d.kapat = () => { if (!d.isConnected) return; d.remove(); if (history.state && history.state.sheet) { sayfa.yut = (sayfa.yut || 0) + 1; history.back(); } };
+  $('[data-x]', d).onclick = () => d.kapat();
+  document.body.appendChild(d);
+  try { history.pushState({ sheet: 1 }, ''); } catch (e) { }
+  return d;
+}
+window.addEventListener('popstate', () => { if (sayfa.yut) { sayfa.yut--; return; } const s = [...document.querySelectorAll('.sheet')].pop(); if (s) s.remove(); });
+
+/* ---------------------------------------------------------- olaylar */
+document.addEventListener('click', async e => {
+  const g = e.target.closest('[data-go]');
+  if (g && !g.disabled) return git(g.dataset.go);
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  const act = a.dataset.act, k = aktif();
+  if (act === 'yolMenu') { e.stopPropagation(); return yolMenu(S.kayitlar.find(x => x.id === a.dataset.id)); }
+  if (act === 'ac') { S.aktif = a.dataset.id; try { localStorage.setItem('yys_aktif', S.aktif); } catch (er) { } return git('saha'); }
+  if (act === 'yeniYol') return yolForm(null);
+  if (act === 'demo') return demo();
+  if (act === 'noktaEkle') return noktaAc();
+  if (act === 'nokta') return noktaAc(+a.dataset.i);
+  if (act === 'izBas') return izBaslat();
+  if (act === 'izDur') return izDurdur();
+  if (act === 'ortala') { await konumAl(true); haritaBen(); haritaOrtala(); if (!S.konum) toast('Konum alınamadı'); return; }
+  if (act === 'imEkle') {
+    const poz = $('#iPoz').value.trim(), mik = num($('#iMik').value);
+    if (!poz) return toast('Poz no girin');
+    if (mik === null || mik <= 0) return toast('Miktar girin');
+    k.imalat.push({ poz, aciklama: $('#iAc').value.trim(), miktar: mik }); await kaydet(k, 'imalat eklendi'); render(); return;
+  }
+  if (act === 'imSec') { $('#iPoz').value = a.dataset.poz; $('#iAc').value = a.dataset.ad; $('#iMik').focus(); return; }
+  if (act === 'imSil') { if (!await onay('İmalat satırı silinsin mi?', 'Sil', true)) return; k.imalat.splice(+a.dataset.j, 1); await kaydet(k, 'imalat silindi'); render(); return; }
+  if (['xlsx', 'xlsxPay', 'json', 'jsonPay', 'kml', 'kmlPay', 'yazdir'].includes(act)) return disaAktar(act);
+  if (act === 'tumYedek') { const b = new Blob([JSON.stringify({ tur: 'saha-tespit-yedek', surum: SURUM, zaman: new Date().toISOString(), kayitlar: S.kayitlar, sozlesmeler: Object.values(S.soz), sanatYapisi: S.syIsler }, null, 1)], { type: 'application/json' }); return indir(b, `SAHA_TESPIT_YEDEK_${trTarih().replace(/\./g, '')}.json`); }
+  if (act === 'iceAl') { const f = $('#dosyaAl'); f.value = ''; f.onchange = () => iceAl(f.files[0]); f.click(); return; }
+  if (act === 'yedekler') return yedekListe();
+  if (act === 'syYeni') return syIsForm(null);
+  if (act === 'syAc') { S.syAktifId = a.dataset.id; return git('saha'); }
+  if (act === 'syMenu') { e.stopPropagation(); return syMenu(S.syIsler.find(x => x.id === a.dataset.id)); }
+  if (act === 'syImalat') return syYapiAc(null);
+  if (act === 'syKopya') return syYapiAc(null, true);
+  if (act === 'syYapi') return syYapiAc(+a.dataset.i);
+  if (act === 'syYol') return syYolForm(a.dataset.j === undefined ? undefined : +a.dataset.j);
+  if (act === 'syBFvars') { try { localStorage.setItem('yys_sybf', JSON.stringify(syAktif().bf || {})); toast('Yeni işler bu fiyatlarla açılacak'); } catch (er) { toast('Kaydedilemedi'); } return; }
+  if (['syXls', 'syXlsPay', 'syKml', 'syFoto'].includes(act)) return syCikti(act);
+  if (act === 'soz') return sozlesmeAc(k);
+  if (act === 'hkIndir') return hkCikti(false);
+  if (act === 'hkPay') return hkCikti(true);
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-mod]'); if (!b) return;
+  S.mod = b.dataset.mod; if (S.map) { S.map.remove(); S.map = null; HL = {}; } git('yollar');
+});
+document.addEventListener('change', async e => {
+  const t = e.target; if (!t.dataset || !t.dataset.bf) return;
+  const is = syAktif(); if (!is) return;
+  is.bf ||= {}; is.bf[t.dataset.bf] = num(t.value); await kaydet(is, 'birim fiyat');
+});
+document.addEventListener('click', async e => {
+  const b = e.target.closest('#hkTur [data-t]'); if (!b) return;
+  const k = aktif(); k.hkTur = b.dataset.t; await kaydet(k); render();
+});
+document.addEventListener('change', async e => {
+  const t = e.target; if (!t.dataset || !t.dataset.hk || S.ekran !== 'ozet') return;
+  const k = aktif(); k[t.dataset.hk] = num(t.value); await kaydet(k);
+});
+async function hkIceAlAkis(f) {
+  let r;
+  try { r = await hkDosyaIceAl(new Uint8Array(await f.arrayBuffer()), f.name); } catch (e) { console.error(e); return toast('Okunamadı: ' + e.message, 5000); }
+  const var_ = S.kayitlar.filter(x => x.kod === r.kod);
+  const mesaj = `<b>${esc(r.kod)}</b> ${esc(r.ad)}<br>Sözleşme: ${sozKalemler(r.s).length} kalem, bedel ${fmt(sozBedel(r.s))} TL<br>`
+    + (r.son ? `${r.son} hakediş, ${r.nokta} etüd noktası alınacak.` : 'Dosyada hakediş yok — yalnız sözleşme bilgileri alınacak.')
+    + (var_.length ? `<br><span style="color:var(--err)">Cihazda bu yolun ${var_.length} kaydı var; aynı hakediş numaraları değiştirilir.</span>` : '');
+  if (!await onay(mesaj, 'İçe al')) return;
+  if (S.soz[r.s.id]) await Depo.yedekle(S.soz[r.s.id], 'içe almadan önce');
+  S.soz[r.s.id] = r.s; await kaydet(r.s, 'hakediş dosyasından');
+  for (const k of r.kayitlar) {
+    for (const x of S.kayitlar.filter(y => y.kod === k.kod && +y.hk === +k.hk)) { await Depo.yedekle(x, 'içe almadan önce'); await Depo.sil(x.id); }
+    S.kayitlar = S.kayitlar.filter(y => !(y.kod === k.kod && +y.hk === +k.hk));
+    S.kayitlar.push(k); await kaydet(k, 'hakediş dosyasından');
+  }
+  let son = r.kayitlar[r.kayitlar.length - 1];
+  if (!son) {
+    son = { id: uid(), kod: r.kod, seflik: r.seflik, ad: r.ad, hk: 1, tarih: trTarih(), noktalar: [], imalat: [], iz: [], olusturma: new Date().toISOString() };
+    S.kayitlar.push(son); await kaydet(son, 'oluşturuldu');
+  }
+  S.aktif = son.id;
+  toast(r.son ? `Alındı. Yeni tespit için: Yollar → ⋯ → Sonraki hakediş (HK ${r.son + 1})` : 'Sözleşme alındı', 5000);
+  git(r.son ? 'yollar' : 'saha');
+}
+async function iceAl(f) {
+  if (!f) return;
+  if (/\.xlsx$/i.test(f.name)) return hkIceAlAkis(f);
+  let d; try { d = JSON.parse(await f.text()); } catch (e) { return toast('JSON okunamadı'); }
+  let gelen = [];
+  if (d.tur === 'saha-tespit-yedek' && Array.isArray(d.kayitlar)) { gelen = d.kayitlar; for (const x of d.sozlesmeler || []) { S.soz[x.id] = x; await kaydet(x); } for (const x of d.sanatYapisi || []) { const v = S.syIsler.findIndex(z => z.id === x.id); if (v >= 0) S.syIsler[v] = x; else S.syIsler.push(x); await kaydet(x); } }
+  else if (Array.isArray(d.noktalar)) {   // HK<N>_tespit_okunan.json
+    const imalat = Object.entries(d.imalat || {}).map(([poz, m]) => ({ poz, aciklama: '', miktar: num(m) }));
+    gelen = [{ id: uid(), kod: d.yol?.kod || f.name.replace(/\.json$/i, ''), seflik: d.yol?.seflik || '', ad: d.yol?.ad || '', hk: d.hk || 1, tarih: d.tarih || trTarih(),
+      noktalar: d.noktalar.map((p, i) => ({ km: num(p.km), u: num(p.u), y: num(p.y), egim: num(p.egim), platform: num(p.platform), hendek: p.hendek ? String(p.hendek)[0].toUpperCase() : null,
+        tip: KODLAR.includes(String(p.tip || '').toUpperCase()) ? String(p.tip || '').toUpperCase() : '', k: num(p.k), h: num(p.h), h2: num(p.h2),
+        zemin: zBos(p.zemin) ? null : (p.zemin || []).slice(0, 5).map(num), alan: num(p.alan), not: p.not || '', lat: num(p.lat), lon: num(p.lon), acc: null, zaman: p.zaman || null, ilkZemin: i === 0 && !zBos(p.zemin) })),
+      imalat, iz: Array.isArray(d.iz) ? d.iz : [], olusturma: new Date().toISOString() }];
+  } else return toast('Tanınmayan dosya biçimi');
+  let n = 0;
+  for (const k of gelen) {
+    const var_ = S.kayitlar.find(x => x.id === k.id);
+    if (var_) { if (!await onay(`${esc(k.kod)} HK ${esc(k.hk)} cihazda var. Üzerine yazılsın mı?`, 'Üzerine yaz', true)) continue; Object.assign(var_, k); await kaydet(var_, 'içe alındı'); }
+    else { S.kayitlar.push(k); await kaydet(k, 'içe alındı'); }
+    n++;
+  }
+  toast(`${n} kayıt içe alındı`); render();
+}
+async function yedekListe() {
+  const y = await Depo.yedekler();
+  const sh = sayfa('Otomatik yedekler', y.length ? `<div class="card" style="padding:4px 10px"><ul class="lst">${y.slice(0, 120).map((x, j) => `<li data-y="${j}"><span style="flex:1"><b>${esc(x.ozet)}</b><br><span class="mut">${new Date(x.zaman).toLocaleString('tr-TR')} · ${esc(x.neden || '')}</span></span><span class="tag">Geri yükle</span></li>`).join('')}</ul></div>` : '<div class="empty">Yedek yok.</div>', '');
+  sh.addEventListener('click', async e => {
+    const li = e.target.closest('[data-y]'); if (!li) return;
+    const x = y[+li.dataset.y], k = JSON.parse(x.veri);
+    if (!await onay(`<b>${esc(x.ozet)}</b><br>${new Date(x.zaman).toLocaleString('tr-TR')} yedeği geri yüklensin mi? Mevcut hali önce yedeklenir.`, 'Geri yükle')) return;
+    if (k.tur === 'soz') { S.soz[k.id] = k; await kaydet(k); sh.kapat(); toast('Sözleşme geri yüklendi'); render(); return; }
+    if (k.tur === 'sy') { const ms = S.syIsler.find(z => z.id === k.id); if (ms) { await Depo.yedekle(ms, 'geri yüklemeden önce'); Object.assign(ms, k); await kaydet(ms); } else { S.syIsler.push(k); await kaydet(k); } S.mod = 'sy'; S.syAktifId = k.id; sh.kapat(); toast('Geri yüklendi (fotoğraflar hariç)'); git('saha'); return; }
+    const mev = S.kayitlar.find(z => z.id === k.id);
+    if (mev) { await Depo.yedekle(mev, 'geri yüklemeden önce'); Object.assign(mev, k); await kaydet(mev); }
+    else { S.kayitlar.push(k); await kaydet(k); }
+    S.aktif = k.id; sh.kapat(); toast('Geri yüklendi'); git('saha');
+  });
+}
+
+/* ---------------------------------------------------------- örnek veri (önizleme denemesi için) */
+async function demo() {
+  const lat0 = 40.7312, lon0 = 30.4021;
+  const k = { id: uid(), kod: '999', seflik: 'ÖRNEK', ad: 'Örnek orman yolu (deneme)', hk: 1, tarih: trTarih(), noktalar: [], imalat: [{ poz: 'OGM/Y.16.050/K', aciklama: 'Kök sökme (örnek)', miktar: 12 }], iz: [], olusturma: new Date().toISOString() };
+  const dz = [null, [100], [100], [90, 10], [80, 20], [80, 20], [60, 30, 10], null, [100], [70, 30]];
+  const tip = ['', '', 'KY', '', 'KP', '', '', 'D', '', ''];
+  for (let i = 0; i < 10; i++) {
+    const km = i * 20 + (i > 3 ? 5 : 0), la = lat0 + i * 0.00016 + Math.sin(i / 2) * 0.00005, lo = lon0 + i * 0.00011;
+    k.noktalar.push({ km, u: i % 3 === 2 ? null : r2(2.5 + Math.sin(i) * 1.2), y: i % 3 === 2 ? 45 + i : null, egim: null, platform: null, hendek: null, tip: tip[i],
+      k: tip[i] === 'KP' ? 1.5 : null, h: tip[i] === 'KP' ? 0.8 : null, h2: null, zemin: dz[i] ? ZN.map((_, j) => dz[i][j] || null) : null, alan: null, not: i === 7 ? 'dere' : '', lat: r6(la), lon: r6(lo), acc: 6, zaman: new Date().toISOString(), ilkZemin: false });
+  }
+  for (let t = 0; t <= 90; t++) k.iz.push([r6(lat0 + t * 0.000016 + Math.sin(t / 20) * 0.00005), r6(lon0 + t * 0.000011), new Date().toISOString()]);
+  S.kayitlar.push(k); await kaydet(k, 'örnek'); S.aktif = k.id; git('saha');
+}
+
+/* ---------------------------------------------------------- başlat */
+(async function () {
+  await Depo.ac();
+  let hep = []; try { hep = await Depo.hepsi(); } catch (e) { }
+  S.kayitlar = hep.filter(x => !x.tur);
+  S.syIsler = hep.filter(x => x.tur === 'sy');
+  try { S.mod = localStorage.getItem('yys_mod') === 'sy' ? 'sy' : 'yy'; S.syAktifId = localStorage.getItem('yys_syaktif'); } catch (e) { }
+  if (!syAktif()) S.syAktifId = null;
+  hep.filter(x => x.tur === 'soz').forEach(x => S.soz[x.id] = x);
+  S.kayitlar.forEach(k => { k.noktalar ||= []; k.imalat ||= []; k.iz ||= []; });
+  try { S.aktif = localStorage.getItem('yys_aktif'); } catch (e) { }
+  if (!aktif()) S.aktif = null;
+  S.ekran = (S.mod === 'sy' ? S.syAktifId : S.aktif) ? 'saha' : 'yollar';
+  render(); gpsGoster();
+  if (!ARTIFACT && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    try {
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => { });
+      let yenilendi = !navigator.serviceWorker.controller;   // ilk kurulumda yeniden yükleme yok
+      navigator.serviceWorker.addEventListener('controllerchange', () => { if (yenilendi) return; yenilendi = true; toast('Uygulama güncellendi — yeniden yükleniyor'); setTimeout(() => location.reload(), 900); });
+    } catch (e) { }
+  }
+  if (!ARTIFACT && 'geolocation' in navigator) konumAl(false).then(() => { haritaBen(); });
+})();
+</script>
+</body>
+</html>
