@@ -1,5 +1,5 @@
 /* Yeni Yol Saha Tespit — çevrimdışı önbellek */
-const CACHE = 'saha-tespit-v1.3';
+const CACHE = 'saha-tespit-v1.4';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './sablon.js', './sablon_sy.js',
   'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'];

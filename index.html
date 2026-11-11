@@ -172,7 +172,7 @@ details.t summary{padding:13px 0;font-weight:650;color:var(--g);cursor:pointer}
    Veri toplama + GPS iz kaydı + Excel / JSON / yazdır + paylaş.
    JSON çıktısı tespit_aktar.py'nin okuduğu HK<N>_tespit_okunan.json biçimidir.
    ===================================================================== */
-const SURUM = '1.3';
+const SURUM = '1.4';
 const ZN = ['Toprak', 'Küskü', 'Y.Kaya', 'S.Kaya', 'Ç.S.Kaya'];
 const ZRENK = ['#a1887f', '#d4a85a', '#8d9aa5', '#5c6f7c', '#2f3b44'];
 const KODLAR = ['', 'KY', 'KP', 'L', 'D', 'S'];
@@ -1149,7 +1149,7 @@ const kolNo = c => [...c].reduce((a, ch) => a * 26 + ch.charCodeAt(0) - 64, 0);
 const kolAd = n => { let s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
 class Kitap {
   static async ac(u8) {
-    const k = new Kitap(); k.L = ZipX.oku(u8); k.td = new TextDecoder(); k.xml = {}; k.bekleyen = {}; k.ss = null;
+    const k = new Kitap(); k.L = ZipX.oku(u8); k.td = new TextDecoder(); k.xml = {}; k.bekleyen = {}; k.ss = null; k.gizleR = {}; k.gizleC = {};
     const wb = await k.metin('xl/workbook.xml'), rels = await k.metin('xl/_rels/workbook.xml.rels');
     const R = [...rels.matchAll(/<Relationship\b[^>]*>/g)].map(x => x[0]);
     k.sayfa = {};
@@ -1216,6 +1216,16 @@ class Kitap {
   }
   async kaydet() {
     await this.uygula();
+    for (const [sh, R] of Object.entries(this.gizleR)) {
+      const yol = this.sayfa[sh]; let x = await this.metin(yol);
+      x = x.replace(/<row r="(\d+)"([^>]*?)(\/?)>/g, (t, r, at, sl) => R.has(+r) && !/hidden=/.test(at) ? `<row r="${r}"${at} hidden="1"${sl}>` : t);
+      this.xml[yol] = x;
+    }
+    for (const [sh, C] of Object.entries(this.gizleC)) {
+      const yol = this.sayfa[sh]; let x = await this.metin(yol);
+      x = x.replace(/<col\b([^>]*?)(\/?)>/g, (t, at, sl) => { const a = +attr(t, 'min'), b = +attr(t, 'max'); return a === b && C.has(a) && !/hidden=/.test(at) ? `<col${at} hidden="1"${sl}>` : t; });
+      this.xml[yol] = x;
+    }
     const te = new TextEncoder();
     for (const g of this.L) if (this.xml[g.ad] !== undefined && /worksheets\/|workbook\.xml$/.test(g.ad)) g.yeni = te.encode(this.xml[g.ad]);
     return ZipX.yaz(this.L);
@@ -1731,6 +1741,7 @@ function sySaha(m) {
   m.innerHTML = `<div id="map" style="height:34vh;min-height:200px"></div>
     <div class="mapbtns"><button class="btn p" data-act="syImalat">+ İmalat</button><button class="btn" data-act="syKopya" ${is.yapilar.length ? '' : 'disabled'}>⧉ Öncekini kopyala</button></div>
     <div class="msg o" style="margin:0 0 10px">Yaklaşık maliyet: <b>${fmt(h.toplam)} TL</b> · ${is.yapilar.length} imalat</div>
+    ${is.soz ? '<div class="msg w" style="margin:0 0 10px">Sözleşme girildi: keşifteki imalatları değiştirmek kalem paylarını ve hakedişleri değiştirir. Hakediş yüzdeleri Özet → Hakedişler ekranından girilir.</div>' : ''}
     ${is.yollar.map(yl => { const L = is.yapilar.map((y, i) => [y, i]).filter(([y]) => y.yol === yl.kod); return `
       <div class="card" style="padding:4px 10px"><div class="row" style="padding:8px 0 4px"><b style="flex:1">Yol ${esc(yl.kod)}${yl.seflik ? ' · ' + esc(yl.seflik) : ''}</b><span class="mut">${L.length} imalat · ${fmt(h.yollar[yl.kod]?._top)} TL</span></div>
       ${L.length ? `<ul class="lst">${L.map(([y, i]) => `<li data-act="syYapi" data-i="${i}"><span class="no" style="${y.cins === 'M' ? 'background:#1565c0' : y.cins === 'D' ? 'background:#8e24aa' : ''}">${i + 1}</span>
@@ -1763,6 +1774,7 @@ function syYapiAc(i, kopyala) {
     : { yol: (son && son.yol) || is.yollar[0]?.kod || '', km: null, cins: 'B', cap: 80, L: null, H: null, boy: null, hd: null, memba: 'VAR', mansap: 'YOK', sekil: 'DİK', su: false, heyelan: false, diger: null, lat: null, lon: null, not: '', foto: [] })
     : JSON.parse(JSON.stringify(is.yapilar[i]));
   y.foto ||= [];
+  if (yeni) y.id = uid();
   const yeniFoto = [];
   const sh = sayfa(yeni ? 'Yeni imalat' : `İmalat ${i + 1}`, `
     <div class="sec"><div class="lbl">Yol ve yeri</div>
@@ -1933,6 +1945,7 @@ function syOzet(m) {
       <span>İmalat</span><b>${is.yapilar.length} (${tip.B} koruge, ${tip.M} menfez, ${tip.D} kafa duvarı)</b>
       ${is.yollar.map(yl => `<span>Yol ${esc(yl.kod)}</span><b>${fmt(h.yollar[yl.kod]?._top)} TL</b>`).join('')}
       <span>Yaklaşık maliyet</span><b style="font-size:18px">${fmt(h.toplam)} TL</b></div></div>
+    ${syHkKart(is)}
     <div class="card"><h2>Kontroller</h2>${h.U.length ? h.U.map(u => `<div class="msg e">${esc(u)}</div>`).join('') : '<div class="msg o">Tüm kontroller tamam.</div>'}
       ${is.yapilar.some(y => y.lat == null) ? `<div class="msg w">${is.yapilar.filter(y => y.lat == null).length} imalatta koordinat yok (zorunlu değil).</div>` : ''}</div>
     <div class="card"><h2>YM icmali ve pursantaj</h2><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
@@ -2006,6 +2019,224 @@ async function syCikti(tur) {
 }
 function paylasVeyaIndir(blob, ad) { return (!ARTIFACT && navigator.canShare) ? paylas(blob, ad, ad) : indir(blob, ad); }
 
+/* =====================================================================
+   SANAT YAPISI — sözleşme + hakediş (imalat yüzdesi → hakediş Excel'i)
+   Mantık hakedis_uret_sy.py / sy_hk_veri.py ile aynı; şablon SANATYAPISI_HAKEDİŞ_ŞABLONU.xlsx.
+   ===================================================================== */
+const SY_SOZ_ALAN = (() => {
+  const g = JSON.parse(JSON.stringify(SOZ_ALAN));
+  g[0][1] = g[0][1].filter(a => !['bolge', 'isletme'].includes(a[0]));
+  g[0][1].splice(2, 0, ['bedel', 'Sözleşme bedeli (TL, KDV hariç)', 'sayi', 1, 'V_Bedel']);
+  g[2][1] = g[2][1].filter(a => !['ym', 'programUz', 'isAdi'].includes(a[0]));
+  g[2][1].unshift(['isAdi', 'İşin adı (boş = keşifteki ad)', 'metin', 0, 'V_IsAdi']);
+  return g;
+})();
+const SY_ESLES = { NT: ['BLK'], ND: ['DI', 'DK'], NB: ['NB'], EKS: ['KZ'] };
+const SY_YUZDE = [0, 25, 50, 75, 100];
+function sySozEksik(is) {
+  const s = is.soz || {}, E = [];
+  SY_SOZ_ALAN.forEach(([, L]) => L.forEach(([k, et, , z]) => { if (z && (s[k] === null || s[k] === undefined || String(s[k]).trim() === '')) E.push(et); }));
+  return E;
+}
+function syKesifListe(is) {   // sy_hk_veri.kesif_ve_yapilar
+  const h = syHesap(is), bf = syBF(is), kesif = [], keys = [];
+  for (const [k, poz, tan, bir] of SY_KALEM) {
+    const m = xr(is.yollar.reduce((a, yl) => a + (h.yollar[yl.kod]?.[k]?.[0] || 0), 0), 3);
+    const t = xr(is.yollar.reduce((a, yl) => a + (h.yollar[yl.kod]?.[k]?.[2] || 0), 0), 2);
+    if (m <= 0 || t <= 0) continue;
+    kesif.push({ k, poz, tan, m, bir, bf: ['NT', 'ND', 'NB'].includes(k) ? xr(t / m, 2) : bf[k], t });
+    keys.push(k);
+  }
+  const yapilar = h.rows.map(r => ({ y: r.y, m: keys.map(k => xr((SY_ESLES[k] || [k]).reduce((a, x) => a + (r.q[x] || 0), 0), 3)) }));
+  return { kesif, keys, yapilar, ym: h.toplam };
+}
+function syHkDeger(is, j, y) {   // j: 1..; boş = önceki
+  for (let h = j; h >= 1; h--) { const v = is.hk?.[h - 1]?.yuzde?.[y.id]; if (v !== undefined && v !== null && v !== '') return v; }
+  return 0;
+}
+const syYuzdeSayi = v => v === 'İPTAL' ? 100 : (num(v) || 0);
+function syHkKontrol(is, j) {
+  const H = [], U = [], hk = is.hk[j - 1];
+  is.yapilar.forEach((y, i) => {
+    const v = syHkDeger(is, j, y), o = j > 1 ? syHkDeger(is, j - 1, y) : 0;
+    if (v !== 'İPTAL' && o !== 'İPTAL' && syYuzdeSayi(v) < syYuzdeSayi(o)) U.push(`${i + 1}. imalat: yüzde düştü (%${fmt(o)} → %${fmt(v)})`);
+    if (hk.tur === 'SON' && v !== 'İPTAL' && syYuzdeSayi(v) < 100) H.push(`${i + 1}. imalat (${y.yol} ${kmF(num(y.km))}): son hakedişte %100 ya da İPTAL olmalı (%${fmt(v)})`);
+  });
+  if (!hk.tarih) H.push('Hakediş tarihi yok');
+  return { H, U };
+}
+function syGenelYuzde(is, j) {   // ekranda gösterim: imalat doğrudan maliyetine göre ağırlıklı
+  const L = syKesifListe(is); let pay = 0, top = 0;
+  L.yapilar.forEach(({ y, m }) => { const t = m.reduce((a, x, i) => a + x * (L.kesif[i].bf || 0), 0); top += t; pay += t * syYuzdeSayi(syHkDeger(is, j, y)) / 100; });
+  return top ? pay / top * 100 : 0;
+}
+
+/* ---- sözleşme ekranı ---- */
+function sySozAc(is) {
+  const s = JSON.parse(JSON.stringify(is.soz || {}));
+  const alan = ([key, et, tur, z]) => {
+    const v = s[key] ?? '';
+    const inp = tur === 'tarih' ? `<input class="i" type="date" data-k="${key}" value="${trToIso(v)}">`
+      : tur === 'evethayir' ? `<select class="i" data-k="${key}"><option value="">HAYIR (varsayılan)</option><option ${v === 'EVET' ? 'selected' : ''}>EVET</option></select>`
+        : `<input class="i" data-k="${key}" ${tur === 'metin' ? '' : 'inputmode="decimal"'} value="${esc(v)}" autocomplete="off">`;
+    return `<label class="f">${esc(et)}${z ? ' <b style="color:var(--err)">*</b>' : ''}</label>${inp}`;
+  };
+  const h = syHesap(is);
+  const sh = sayfa('Sözleşme', `<div class="msg o">Yaklaşık maliyet (keşif): <b>${fmt(h.toplam)} TL</b>. Sözleşme bedeli girilince kalem payları pursantaja göre dağıtılır.</div>
+    ${SY_SOZ_ALAN.map(([bas, L], gi) => gi < 2 ? `<div class="sec"><div class="lbl">${esc(bas)}</div>${L.map(alan).join('')}</div>`
+      : `<details class="t" style="margin-bottom:10px"><summary>${esc(bas)}</summary>${L.map(alan).join('')}<div style="height:12px"></div></details>`).join('')}`,
+    `<button class="btn p big" id="sKay">Kaydet</button>`);
+  $('#sKay', sh).onclick = async () => {
+    sh.querySelectorAll('[data-k]').forEach(el => {
+      const tur = SY_SOZ_ALAN.flatMap(g => g[1]).find(a => a[0] === el.dataset.k)[2], v = el.value.trim();
+      s[el.dataset.k] = tur === 'tarih' ? (v ? isoToTr(v) : null) : (tur === 'sayi' || tur === 'yuzde') ? num(v) : (v || null);
+    });
+    is.soz = s; await kaydet(is, 'sözleşme'); sh.kapat(); render();
+    const E = sySozEksik(is); toast(E.length ? `Kaydedildi — ${E.length} zorunlu alan eksik` : 'Sözleşme kaydedildi');
+  };
+}
+
+/* ---- hakediş kartı (sanat yapısı özet ekranında) ---- */
+function syHkKart(is) {
+  const E = sySozEksik(is), hk = is.hk || [];
+  return `<div class="card"><h2>Sözleşme ve hakedişler</h2>
+    ${is.soz ? (E.length ? `<div class="msg e">Sözleşme eksik (${E.length}): ${esc(E.slice(0, 3).join(', '))}${E.length > 3 ? '…' : ''}</div>`
+      : `<div class="msg o">${esc(is.soz.yuklenici)} · bedel <b>${fmt(is.soz.bedel)} TL</b> · sözleşme / YM %${fmt(is.soz.bedel / syHesap(is).toplam * 100, 2)}</div>`)
+      : '<div class="mut" style="margin-bottom:8px">İhale yapılıp sözleşme imzalanınca sözleşme bilgilerini girin; sonra her hakedişte imalatların yüzdesini işaretleyin.</div>'}
+    <button class="btn" style="width:100%" data-act="sySoz">${is.soz ? 'Sözleşme bilgileri' : 'Sözleşme bilgilerini gir'}</button>
+    ${hk.length ? `<ul class="lst" style="margin-top:6px">${hk.map((x, j) => `<li data-act="syHk" data-j="${j}"><span class="no">${j + 1}</span><span style="flex:1"><b>${j + 1}. ${x.tur === 'SON' ? 'SON' : 'ARA'} hakediş</b><br><span class="mut">${esc(x.tarih || '—')} · gerçekleşme ≈ %${fmt(syGenelYuzde(is, j + 1), 1)}</span></span><span class="mut">›</span></li>`).join('')}</ul>` : ''}
+    <button class="btn p" style="width:100%;margin-top:8px" data-act="syHkYeni" ${is.soz && !E.length && !(hk.length && hk[hk.length - 1].tur === 'SON') ? '' : 'disabled'}>+ ${hk.length + 1}. hakediş tespiti</button>
+  </div>`;
+}
+
+/* ---- hakediş tespit ekranı ---- */
+function syHkAc(j0) {
+  const is = syAktif(); if (!is) return;
+  is.hk ||= [];
+  const yeni = j0 === undefined || j0 === null, j = yeni ? is.hk.length + 1 : j0 + 1;
+  const hk = yeni ? { no: j, tarih: trTarih(), tur: 'ARA', yuzde: {} } : JSON.parse(JSON.stringify(is.hk[j0]));
+  hk.yuzde ||= {};
+  const onceki = y => j > 1 ? syHkDeger(is, j - 1, y) : 0;
+  const deger = y => hk.yuzde[y.id] ?? onceki(y);
+  const satir = (y, i) => {
+    const v = deger(y), o = onceki(y);
+    return `<div class="card" style="padding:10px" data-y="${y.id}">
+      <div class="row" style="align-items:flex-start"><div style="flex:1"><b>${i + 1}. ${esc(y.yol)} · ${kmF(num(y.km))}</b> <span class="mut">${esc(syEtiket(y))}</span></div>
+        <span class="tag" style="flex:none;${v === 'İPTAL' ? '' : syYuzdeSayi(v) >= 100 ? 'background:#e3f2e5;color:var(--ok)' : 'background:var(--g3);color:var(--g)'}">${v === 'İPTAL' ? 'İPTAL' : '%' + fmt(v)}</span></div>
+      <div class="mut" style="margin:4px 0 6px">Önceki: ${o === 'İPTAL' ? 'İPTAL' : '%' + fmt(o)}</div>
+      <div class="grid5" style="grid-template-columns:repeat(6,1fr)">${SY_YUZDE.map(p => `<button class="chip ${v !== 'İPTAL' && syYuzdeSayi(v) === p ? 'on' : ''}" data-p="${p}">${p}</button>`).join('')}<button class="chip acc ${v === 'İPTAL' ? 'on' : ''}" data-p="İPTAL" style="font-size:12px">İPTAL</button></div>
+      <input class="i" style="margin-top:6px;min-height:40px;font-size:15px" inputmode="decimal" placeholder="başka % (ör. 60)" data-oz="1" value="${v !== 'İPTAL' && !SY_YUZDE.includes(syYuzdeSayi(v)) ? fmt(v) : ''}">
+    </div>`;
+  };
+  const sh = sayfa(`${j}. hakediş tespiti`, `
+    <div class="sec"><div class="row"><div><label class="f" style="margin-top:0">Hakediş tarihi</label><input class="i" type="date" id="hTar" value="${trToIso(hk.tarih)}"></div>
+      <div><label class="f" style="margin-top:0">Türü</label><div class="seg" id="hTur"><button data-t="ARA">ARA</button><button data-t="SON">SON</button></div></div></div>
+      <div class="mut" style="margin-top:6px">Her imalatın <b>kümülatif</b> tamamlanma yüzdesini işaretleyin. Yapılmayacak imalat: İPTAL (payı azalan işe aktarılır).</div>
+      <button class="btn" style="width:100%;margin-top:8px" id="hTum">Hepsini %100 yap (İPTAL olanlar hariç)</button></div>
+    <div id="hList">${is.yapilar.map(satir).join('')}</div>
+    <details class="t"><summary>Bu hakedişteki kesintiler (isteğe bağlı)</summary>
+      <label class="f">SGK kesintisi (TL)</label><input class="i" inputmode="decimal" id="hSgk" value="${hk.sgk ?? ''}">
+      <label class="f">İdare makinesi kirası (TL)</label><input class="i" inputmode="decimal" id="hMak" value="${hk.makine ?? ''}">
+      <label class="f">Avans mahsubu (TL)</label><input class="i" inputmode="decimal" id="hAv" value="${hk.avans ?? ''}"><div style="height:12px"></div></details>
+    <div id="hMsg" style="margin-top:10px"></div>
+    ${!yeni && j === is.hk.length ? '<button class="btn d" style="width:100%;margin-top:8px" id="hSil">Bu hakedişi sil</button>' : ''}`,
+    `<button class="btn" id="hKay">Kaydet</button><button class="btn p" id="hXls">Excel</button><button class="btn a" id="hPay" ${ARTIFACT ? 'disabled' : ''}>Paylaş</button>`);
+  const $$ = q => $(q, sh);
+  const turCiz = () => sh.querySelectorAll('#hTur [data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === hk.tur));
+  const yeniden = id => { const i = is.yapilar.findIndex(y => y.id === id); const el = sh.querySelector(`[data-y="${id}"]`); el.outerHTML = satir(is.yapilar[i], i); };
+  sh.addEventListener('click', e => {
+    const t = e.target.closest('#hTur [data-t]'); if (t) { hk.tur = t.dataset.t; turCiz(); return; }
+    const b = e.target.closest('[data-p]'); if (!b) return;
+    const id = b.closest('[data-y]').dataset.y;
+    hk.yuzde[id] = b.dataset.p === 'İPTAL' ? 'İPTAL' : +b.dataset.p; yeniden(id);
+  });
+  sh.addEventListener('change', e => {
+    if (!e.target.dataset.oz) return;
+    const id = e.target.closest('[data-y]').dataset.y, v = num(e.target.value);
+    if (v === null) return;
+    if (v < 0 || v > 100) { toast('Yüzde 0–100 arası olmalı'); return; }
+    hk.yuzde[id] = v; yeniden(id);
+  });
+  $$('#hTum').onclick = () => { is.yapilar.forEach(y => { if (deger(y) !== 'İPTAL') hk.yuzde[y.id] = 100; }); $$('#hList').innerHTML = is.yapilar.map(satir).join(''); };
+  turCiz();
+  function oku() { hk.tarih = isoToTr($$('#hTar').value) || null; hk.sgk = num($$('#hSgk').value); hk.makine = num($$('#hMak').value); hk.avans = num($$('#hAv').value); hk.no = j; }
+  async function kaydetHk(sessiz) {
+    oku();
+    is.yapilar.forEach(y => { if (hk.yuzde[y.id] === undefined) hk.yuzde[y.id] = onceki(y); });
+    is.hk[j - 1] = hk; await kaydet(is, `HK${j}`);
+    const k = syHkKontrol(is, j);
+    $$('#hMsg').innerHTML = k.H.map(x => `<div class="msg e">✕ ${esc(x)}</div>`).join('') + k.U.map(x => `<div class="msg w">! ${esc(x)}</div>`).join('');
+    if (!sessiz) toast(k.H.length ? `Kaydedildi — ${k.H.length} hata` : 'Kaydedildi');
+    return k;
+  }
+  async function cikti(pay) {
+    const k = await kaydetHk(true);
+    if (k.H.length) { $$('#hMsg').scrollIntoView({ block: 'center' }); return toast('Önce hataları giderin'); }
+    toast('Hakediş hazırlanıyor…', 3000);
+    try {
+      const r = await syHakedisUret(is, j);
+      if (pay) await paylas(r.blob, r.ad, `${is.ad || syIsAdi(is)} — ${j} nolu ${hk.tur === 'SON' ? 'son' : 'ara'} hakediş`); else await indir(r.blob, r.ad);
+    } catch (e) { console.error(e); toast('Hakediş üretilemedi: ' + e.message, 6000); }
+  }
+  $$('#hKay').onclick = async () => { await kaydetHk(); };
+  $$('#hXls').onclick = () => cikti(false);
+  $$('#hPay').onclick = () => cikti(true);
+  if ($$('#hSil')) $$('#hSil').onclick = async () => { if (!await onay(`${j}. hakediş silinsin mi?`, 'Sil', true)) return; is.hk.splice(j - 1, 1); await kaydet(is, `HK${j} silindi`); sh.kapat(); render(); };
+  sh._kapanis = () => render();
+}
+
+/* ---- hakediş Excel'i ---- */
+async function syHakedisUret(is, n) {
+  const E = sySozEksik(is); if (E.length) throw new Error('Sözleşme eksik: ' + E.slice(0, 3).join(', '));
+  if (n > 12) throw new Error('Şablon en çok 12 hakediş tutar');
+  const L = syKesifListe(is);
+  if (L.kesif.length > 30) throw new Error('Keşif 30 kalemi aşıyor');
+  if (!window.SABLON_SY_HK_B64) await sySablon();
+  const b = atob(window.SABLON_SY_HK_B64), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+  const kb = await Kitap.ac(u), s = is.soz;
+  const v = (nm, x) => { if (x !== null && x !== undefined && x !== '') kb.yazAd(nm, x); };
+  v('V_Bolge', is.bolge); v('V_Isletme', is.isletme); v('V_IsAdi', s.isAdi || is.ad || syIsAdi(is));
+  SY_SOZ_ALAN.forEach(([, A]) => A.forEach(([key, , tur, , vn]) => {
+    if (key === 'isAdi') return;
+    let x = s[key]; if (x === null || x === undefined || x === '') return;
+    if (tur === 'tarih') x = trSeri(x); else if (tur === 'sayi') x = num(x); else if (tur === 'yuzde') x = num(x) / 100;
+    if (x !== null) kb.yazAd(vn, x);
+  }));
+  kb.yazAd('V_HkSecim', n);
+  // KEŞİF
+  const k0 = kb.ref('K_Poz').r1;
+  L.kesif.forEach((x, i) => { const r = k0 + i, w = (c, val) => kb.yaz('KEŞİF', c + r, val); w('B', x.poz); w('C', x.tan); w('D', x.m); w('E', x.bir); w('F', x.bf); w('M', x.t); });
+  // YAPI METRAJI ve YAPI TESPİT
+  const y0 = kb.ref('SY_Cins').r1, t0 = kb.ref('SY_In');
+  L.yapilar.forEach(({ y, m }, i) => {
+    const r = y0 + i, w = (c, val) => kb.yaz('YAPI METRAJI', c + r, val);
+    w('A', i + 1); w('B', String(y.yol)); w('C', num(y.km)); w('D', SY_CINS[y.cins]);
+    w('E', y.cins === 'M' ? `${(+y.L).toFixed(2)} × ${(+y.H).toFixed(2)}`.replace(/\./g, ',') : `Ø${y.cap}`); w('F', y.cins === 'D' ? 0 : num(y.boy));
+    m.forEach((x, j) => w(kolAd(7 + j), x || null));
+    for (let h = 1; h <= n; h++) { const d = syHkDeger(is, h, y); kb.yaz('YAPI TESPİT', kolAd(t0.c1 + h - 1) + (t0.r1 + i), d === 'İPTAL' ? 'İPTAL' : syYuzdeSayi(d) / 100); }
+  });
+  // hakediş geçmişi
+  for (let h = 1; h <= n; h++) {
+    const x = is.hk[h - 1];
+    kb.yazAd('G_Tarih', trSeri(x.tarih), 0, h - 1); kb.yazAd('G_Tur', x.tur || 'ARA', 0, h - 1);
+    if (num(x.sgk)) kb.yazAd('G_SGK', num(x.sgk), 0, h - 1);
+    if (num(x.makine)) kb.yazAd('G_Makine', num(x.makine), 0, h - 1);
+    if (num(x.avans)) kb.yazAd('G_Avans', num(x.avans), 0, h - 1);
+  }
+  // boş satırları gizle (build_sy_hakedis GizleBos ile aynı)
+  const nk = L.kesif.length, ny = L.yapilar.length, NK = 30, NAM = 10, NA = 40, g_in0 = 22, e0 = kb.ref('G_Eff').r1, yI = 9, yb0 = 41, p0 = 6, a0 = 7, q0 = 39;
+  const G = (sh, r) => (kb.gizleR[sh] ||= new Set()).add(r);
+  for (let i = nk; i < NK; i++) { G('KEŞİF', k0 + i); G('GERÇEKLEŞME', g_in0 + i); G('GERÇEKLEŞME', e0 + i); G('YAPILAN İŞLER', yI + i); G('PURSANTAJ', p0 + i); }
+  for (const i of [...Array(NAM).keys(), ...Array(NA - NAM - nk).keys()].map((x, k) => k < NAM ? x : NAM + nk + x)) { G('YAPILAN İŞLER', yb0 + i); G('GERÇEKLEŞME', g_in0 + NK + i); G('GERÇEKLEŞME', e0 + NK + i); }
+  for (const i of [...Array(NAM - 3).keys()].map(x => x + 3).concat([...Array(NA - NAM - nk).keys()].map(x => NAM + nk + x))) G('ARTAN-AZALAN', a0 + i);
+  for (let i = ny + 3; i < 150; i++) for (const sh of ['YAPI METRAJI', 'YAPI TESPİT', 'HAKEDİŞ TESPİT TUTANAĞI']) G(sh, y0 + i);
+  for (let i = 0; i < 5; i++) G('PURSANTAJ', q0 + 2 + i);
+  for (let j = nk; j < NK; j++) (kb.gizleC['YAPI METRAJI'] ||= new Set()).add(7 + j);
+  const blob = await kb.kaydet();
+  const ad = `${is.yollar.map(y => String(y.kod).replace(/[\\/:*?"<>|\s]+/g, '_')).join('-')}_${trUp(is.isletme).replace(/\s+/g, '')}_SANATYAPISI_HK${n}.xlsx`;
+  return { blob, ad };
+}
+
 /* ---------------------------------------------------------- tam ekran sayfa */
 function sayfa(baslik, govde, alt) {
   const d = document.createElement('div'); d.className = 'sheet';
@@ -2054,6 +2285,9 @@ document.addEventListener('click', async e => {
   if (act === 'syYol') return syYolForm(a.dataset.j === undefined ? undefined : +a.dataset.j);
   if (act === 'syBFvars') { try { localStorage.setItem('yys_sybf', JSON.stringify(syAktif().bf || {})); toast('Yeni işler bu fiyatlarla açılacak'); } catch (er) { toast('Kaydedilemedi'); } return; }
   if (['syXls', 'syXlsPay', 'syKml', 'syFoto'].includes(act)) return syCikti(act);
+  if (act === 'sySoz') return sySozAc(syAktif());
+  if (act === 'syHk') return syHkAc(+a.dataset.j);
+  if (act === 'syHkYeni') return syHkAc(null);
   if (act === 'soz') return sozlesmeAc(k);
   if (act === 'hkIndir') return hkCikti(false);
   if (act === 'hkPay') return hkCikti(true);
@@ -2159,6 +2393,7 @@ async function demo() {
   let hep = []; try { hep = await Depo.hepsi(); } catch (e) { }
   S.kayitlar = hep.filter(x => !x.tur);
   S.syIsler = hep.filter(x => x.tur === 'sy');
+  S.syIsler.forEach(is => is.yapilar.forEach(y => { y.id ||= uid(); }));
   try { S.mod = localStorage.getItem('yys_mod') === 'sy' ? 'sy' : 'yy'; S.syAktifId = localStorage.getItem('yys_syaktif'); } catch (e) { }
   if (!syAktif()) S.syAktifId = null;
   hep.filter(x => x.tur === 'soz').forEach(x => S.soz[x.id] = x);

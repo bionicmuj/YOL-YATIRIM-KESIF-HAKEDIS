@@ -1,6 +1,6 @@
 # Yeni Yol Saha Tespit — Kurulum (Aşama 1)
 
-Dosyalar: `index.html`, `sw.js`, `sablon.js` (yeni yol hakediş şablonu), `sablon_sy.js` (sanat yapısı keşif şablonu), `manifest.webmanifest`, `icon-192.png`, `icon-512.png` — hepsi deponun ana dizininde durmalı.
+Dosyalar: `index.html`, `sw.js`, `sablon.js` (yeni yol hakediş şablonu), `sablon_sy.js` (sanat yapısı keşif + hakediş şablonları), `manifest.webmanifest`, `icon-192.png`, `icon-512.png` — hepsi deponun ana dizininde durmalı.
 
 Güncellemede yalnız değişen dosyaları (genelde `index.html`, `sw.js`, bazen `sablon.js`) GitHub'da Add file → Upload files ile üzerine yükleyin. Telefonda uygulamayı kapatıp iki kez açınca yeni sürüm gelir (Yollar ekranının altında sürüm no yazar).
 
@@ -35,3 +35,9 @@ Güncellemede yalnız değişen dosyaları (genelde `index.html`, `sw.js`, bazen
 - **İmalatlar → + İmalat:** yol, km, cinsi (koruge Ø / kutu menfez L×H / mevcut boruya kafa duvarı), boy, giriş-çıkış var/yok, üstteki toprak (boş = açıklık kadar), su toplama çukuru / heyelan, konum ve fotoğraf (isteğe bağlı). *Öncekini kopyala* aynı tip yapılar için.
 - **Özet:** yaklaşık maliyet (yol yol + icmal, pursantaj), kontroller; Keşif Excel'i indir / paylaş, konumlar (KML), fotoğraflar (zip, ayrı paylaşım).
 - Kazı kuralı: gövde = boy × (iç açıklık + 2 m) × (üstteki toprak + iç açıklık); her imalata 60 m × 0,18 m² hendek + su çukuru 1 m³ + heyelan 10 m³.
+
+## Sanat yapısı hakedişi (v1.4)
+- Özet → **Sözleşme ve hakedişler** → *Sözleşme bilgilerini gir* (bir kez: yüklenici, EKAP, sözleşme bedeli, tarihler, süre, imzalar).
+- **+ N. hakediş tespiti:** tarih, ARA / SON; her imalata kümülatif yüzde (0 / 25 / 50 / 75 / 100, başka %, İPTAL). Önceki yüzde gösterilir; “Hepsini %100 yap” son hakedişte işe yarar.
+- **Excel / Paylaş:** hakediş şablonunun tamamı (rapor, icmal, yapılan işler, pursantaj, artan-azalan, yapı tespit tutanağı, kontrol). İPTAL edilen imalatın payı azalan işe kendiliğinden aktarılır.
+- Kontroller: yüzde düşerse uyarı; SON hakedişte %100 ya da İPTAL olmayan imalat varsa dosya üretilmez.
